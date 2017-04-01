@@ -1,0 +1,40 @@
+<div class="container" ng-controller="MakeOfferCtrl">
+    <div class="messages">
+        <span class="success-message" ng-bind="successMessage"></span>
+        <span class="error-message" ng-bind="errorMessage"></span>
+    </div>
+      <div class="jumbotron" ng-init="getCurrentBid()">
+        <p>
+          Current bid: £{{blurbMakeOffer.Maxoffer}}
+        </p>
+        <form name="makeOfferform">
+            <div class="form-group">
+
+              <label>
+                Your offer &nbsp; 
+                  <span class="label label-danger">
+                      (Minimum Offer : <span ng-if="blurbMakeOffer.Maxoffer == 0">{{blurbMakeOffer.Minoffer}})</span>
+                                        <span ng-if="blurbMakeOffer.Maxoffer > 0">{{blurbMakeOffer.Maxoffer+1}})</span>
+                  </span>
+              </label>
+              <input type="number" class="form-control" ng-model="yourOffer"
+                     name="yourOffer" min="{{blurbMakeOffer.Minoffer}}" required>
+              <span class="control-group error">
+                <span class="error" ng-show="makeOfferform.yourOffer.$error.required">Required and Only numeric values allowed</span>
+<!--                <span class="error" ng-show="makeOfferform.yourOffer.$error.number">Only numeric values allowed</span>-->
+<!--                <span class="error" ng-show="makeOfferform.yourOffer.$error.min">Bid should be greater than Min Offer</span>-->
+             </span>
+            </div>
+            <p>
+                              
+              <a id="make-offer-link" href ng-disabled="!makeOfferform.$valid" 
+                 ng-click="makeOffer(blurbMakeOffer.BlurbId)"
+                 class="btn btn-primary btn-lg">Make offer</a>
+               <!-- 
+                <a id="create-blurb-link" href ng-disabled="!createblurbform.$valid" ng-click="createBlurb()" 
+             class="btn btn-lg btn-primary">Create</a>--> 
+            </p>
+        </form>
+      </div>
+    
+</div>

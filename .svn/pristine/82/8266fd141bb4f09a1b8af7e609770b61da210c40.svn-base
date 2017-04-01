@@ -1,0 +1,46 @@
+module.exports = function (sequelize, DataTypes) {
+    return = sequelize.define('Offer', {
+        offerprice: {
+            type: Sequelize.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: true,
+                notNull: true
+            }
+        },
+        time: {
+            type: Sequelize.DATE,
+            defaultValue: Sequelize.NOW
+        },
+        //    usid: {
+        //        type: Sequelize.INTEGER,
+        //        allowNull: false,
+        //        references: 'user',
+        //        referencesKey: 'id',
+        //        validate: {
+        //            notNull: true
+        //        }
+        //    },
+        //    blid: {
+        //        type: Sequelize.INTEGER,
+        //        allowNull: false,
+        //        references: 'blurb',
+        //        referencesKey: 'id',
+        //        validate: {
+        //            notNull: true
+        //        }
+        //    },
+    });
+    user.hasMany(offer, {
+        foreignKey: 'user_Id'
+    });
+    offer.belongsTo(user, {
+        foreignKey: 'user_Id'
+    });
+
+    blurb.hasMany(offer, {
+        foreignKey: 'blurb_Id'
+    });
+    offer.belongsTo(blurb, {
+        foreignKey: 'blurb_Id'
+    });

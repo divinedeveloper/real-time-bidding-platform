@@ -1,0 +1,16 @@
+<div class="container" ng-controller="ForgotPasswordCtrl">
+      <div class="form-group">
+      </div>
+      <h3>
+        Forgot password
+      </h3>
+      <div class="form-group">
+        <label>
+          Email
+        </label>
+        <input type="text" class="form-control">
+      </div>
+      <div class="form-group">
+        <a href="#" class="btn btn-lg btn-primary">Forgot Password</a>
+      </div>
+    </div>

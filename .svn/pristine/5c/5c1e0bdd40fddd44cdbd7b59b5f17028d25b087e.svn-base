@@ -1,0 +1,29 @@
+myApp.controller('EditBlurb1Ctrl', ['$scope', '$http', '$location', '$routeParams', function($scope, $http, $location, $routeParams) {
+        $scope.successMessage;
+        $scope.errorMessage;
+        $scope.getBlurbsListForUser = function(){
+                        
+            $http({method: 'GET', url: '/blurb/userBlurb'}).
+                success(function(data, status, headers, config) {
+                       if(status == 200 && data.message == "Available Blurb"){
+//                           alert(data.response.length); 
+                           $scope.user_blurb_list = data.response;
+                       }else{
+                           $scope.errorMessage = data.message;
+                       }
+
+                     }).
+                error(function(data, status, headers, config) {
+                    if(status == 404){
+                      $location.path("/page-not-found");
+                    }
+                   $scope.errorMessage = data.message;
+                 }); 
+        }
+        
+        $scope.goToEditBlurb = function(id){
+            $routeParams.blurb_id = id;
+            $location.path("/edit/" +$routeParams.blurb_id);
+        }
+    
+}]);

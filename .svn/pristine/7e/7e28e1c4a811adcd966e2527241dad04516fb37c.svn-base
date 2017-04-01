@@ -1,0 +1,54 @@
+<div class="container" ng-controller="EditBlurb2Ctrl">
+      <label>
+        Link &nbsp;&nbsp;
+      </label>
+      <div>
+<!--        blurb.io/username/:id-->{{blurb.link}}
+      </div>
+      <div class="form-group">
+        <div class="input-group">
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-group">
+          <label>
+            Minimum Offer
+            <div>
+              <span style="font-weight: normal;">£{{blurb.minoffer}}</span>
+            </div>
+          </label>
+        </div>
+        <label>
+          Title
+        </label>
+        <input type="text" class="form-control" ng-model="blurb.title" name="blurbTitle" 
+                 ng-required="true">
+<!--
+            <span class="control-group error">
+                <span class="error" ng-show="editblurbform.blurbTitle.$error.required">Required!</span>
+            </span>
+-->
+      </div>
+      <div class="form-group">
+        <label>
+          Description
+        </label>
+          <textarea class="form-control" ng-model="blurb.description" name="blurbDescription"></textarea>
+      </div>
+      <div class="form-group">
+        <label>
+          URL
+        </label>
+        <input type="text" class="form-control" placeholder="Please enter link" ng-model="blurb.url" name="blurbUrlLink">
+      </div>
+      <div class="form-group">
+        <label>
+          Upload file
+        </label>
+        <input type="file" class="form-control" ng-file-select="onFileSelect($files)">
+      </div>
+      <a href="#" class="btn btn-lg btn-primary">Save</a>
+      <a href="#" class="btn btn-lg btn-primary">Delete</a>
+    </div>
+    <div class="form-group">
+    </div>

@@ -1,0 +1,382 @@
+/**
+ * Module dependencies.
+ */
+
+var express = require('express'),
+	routes = require('./routes'),
+	api = require('./routes/api');
+
+
+var mysql = require('mysql');
+var Sequelize = require('sequelize');
+
+var app = module.exports = express();
+//var route = require('./App/controller/usercontroller.js');
+//route.controller(app)
+
+//mysql coonection  
+var sequelize = new Sequelize('blurbDB', 'root', 'root', {
+	dialect: "mysql",
+	port: 3306,
+	define: {
+		timestamps: false,
+	}
+});
+
+sequelize
+	.authenticate()
+	.complete(function (err) {
+		if (!!err) {
+			console.log('Can not connect Database:', err)
+		} else {
+			console.log('Connected Database successfully.')
+		}
+	})
+
+var user = sequelize.define('user', {
+	usertype: {
+		type: Sequelize.ENUM('MERCHANT', 'BIDDER'),
+		defaultValue: 'BIDDER',
+		allowNull: true,
+		validate: {
+			is: ["^[a-z]+$", 'i'],
+			isUppercase: true,
+			notNull: false
+		}
+	},
+	name: {
+		type: Sequelize.STRING,
+		allowNull: true,
+		validate: {
+			is: ["^[a-z]+$", 'i'],
+			notNull: false,
+			len: {
+				args: 3,
+				msg: "Name must be atleast 3 characters in length"
+			}
+		}
+	},
+	email: {
+		type: Sequelize.STRING,
+		allowNull: false,
+		unique: true,
+		validate: {
+			notEmpty: true,
+			notNull: true,
+			len: {
+				args: [6, 128],
+				msg: "Email address must be between 6 and 128 characters in length"
+			},
+			isEmail: {
+				msg: "Email address must be valid"
+			}
+		}
+	},
+	password: {
+		type: Sequelize.STRING,
+		allowNull: false,
+		validate: {
+			notEmpty: true,
+			notNull: true,
+			len: {
+				args: 3
+			}
+		}
+	},
+	companyname: {
+		type: Sequelize.STRING,
+		allowNull: true,
+		validate: {
+			notNull: false,
+			len: {
+				args: 3,
+				msg: "Name must be atleast 3 characters in length"
+			}
+		}
+	},
+	phone: {
+		type: Sequelize.STRING,
+		allowNull: true,
+		validate: {
+			isNumeric: true,
+			notNull: false,
+			len: {
+				args: 10,
+				msg: "Phone Number must be atleast 10 Integer in length"
+			}
+		}
+	},
+	description: {
+		type: Sequelize.TEXT,
+		allowNull: true,
+		validate: {
+			notNull: false
+		}
+	},
+	logo: {
+		type: Sequelize.STRING,
+		allowNull: true,
+		validate: {
+			notNull: false
+		}
+	},
+	delflag: {
+		type: Sequelize.BOOLEAN,
+		allowNull: false,
+		defaultValue: false,
+		validate: {
+			notNull: true
+		}
+	}
+});
+
+var blurb = sequelize.define('blurb', {
+	link: {
+		type: Sequelize.STRING,
+		allowNull: false,
+		validate: {
+			notNull: true,
+			notEmpty: true
+		}
+	},
+	minoffer: {
+		type: Sequelize.STRING,
+		allowNull: false,
+		validate: {
+			notNull: true,
+			notEmpty: true
+		}
+	},
+	title: {
+		type: Sequelize.STRING,
+		allowNull: false,
+		unique: true,
+		validate: {
+			notEmpty: true,
+			notNull: true
+		}
+	},
+	description: {
+		type: Sequelize.TEXT,
+		allowNull: true,
+		validate: {
+			notNull: false
+		}
+	},
+	url: {
+		type: Sequelize.STRING,
+		allowNull: true,
+		validate: {
+			notNull: false,
+			isUrl: true
+		}
+	},
+	fileName: {
+		type: Sequelize.STRING,
+		allowNull: true,
+		validate: {
+			notNull: false
+		}
+	},
+	delflag: {
+		type: Sequelize.BOOLEAN,
+		allowNull: false,
+		defaultValue: false,
+		validate: {
+			notNull: true
+		}
+	}
+
+});
+user.hasMany(blurb, {
+	foreignKey: 'user_id'
+});
+blurb.belongsTo(user, {
+	foreignKey: 'user_id'
+});
+
+var offer = sequelize.define('offer', {
+	offerprice: {
+		type: Sequelize.STRING,
+		allowNull: false,
+		validate: {
+			notEmpty: true,
+			notNull: true
+		}
+	},
+	time: {
+		type: Sequelize.DATE,
+		defaultValue: Sequelize.NOW
+	},
+	//    usid: {
+	//        type: Sequelize.INTEGER,
+	//        allowNull: false,
+	//        references: 'user',
+	//        referencesKey: 'id',
+	//        validate: {
+	//            notNull: true
+	//        }
+	//    },
+	//    blid: {
+	//        type: Sequelize.INTEGER,
+	//        allowNull: false,
+	//        references: 'blurb',
+	//        referencesKey: 'id',
+	//        validate: {
+	//            notNull: true
+	//        }
+	//    },
+});
+user.hasMany(offer, {
+	foreignKey: 'user_Id'
+});
+offer.belongsTo(user, {
+	foreignKey: 'user_Id'
+});
+
+blurb.hasMany(offer, {
+	foreignKey: 'blurb_Id'
+});
+offer.belongsTo(blurb, {
+	foreignKey: 'blurb_Id'
+});
+
+var subscribe = sequelize.define('subscribe', {
+	//    subusid: {
+	//        type: Sequelize.INTEGER,
+	//        allowNull: false,
+	//        references: 'user',
+	//        referencesKey: 'id',
+	//        validate: {
+	//            notNull: true
+	//        }
+	//    },
+	//    subblid: {
+	//        type: Sequelize.INTEGER,
+	//        allowNull: false,
+	//        references: 'blurb',
+	//        referencesKey: 'id',
+	//        validate: {
+	//            notNull: true
+	//        }
+	//    },
+});
+user.hasMany(subscribe, {
+	foreignKey: 'user_ID'
+});
+subscribe.belongsTo(user, {
+	foreignKey: 'user_ID'
+});
+
+
+blurb.hasMany(subscribe, {
+	foreignKey: 'blurb_ID'
+});
+subscribe.belongsTo(blurb, {
+	foreignKey: 'blurb_ID'
+});
+
+sequelize
+	.sync({
+		force: false
+	})
+	.complete(function (err) {
+		if (!!err) {
+			console.log('An error occurred:', err)
+		} else {
+			console.log('Table creted')
+		}
+	})
+
+
+
+// Configuration
+app.configure(function () {
+	app.use(express.bodyParser());
+	app.use(express.methodOverride());
+	app.use(express.static(__dirname + '/public'));
+	app.use(app.router);
+});
+
+app.configure('development', function () {
+	app.use(express.errorHandler({
+		dumpExceptions: true,
+		showStack: true
+	}));
+});
+
+app.configure('production', function () {
+	app.use(express.errorHandler());
+});
+
+
+
+// Routes
+
+app.get('/', routes.index);
+app.get('/partials/:name', routes.partials);
+
+// JSON API
+
+//remove
+app.post('/user', api.userAdd(sequelize, user));
+app.post('/signup', api.userSignup(sequelize, user));
+//remove
+app.post('/checkemail', api.checkEmail(sequelize, user));
+app.get('/user', api.userAll(sequelize, user));
+//remove
+app.get('/user/:id', api.userOne(sequelize, user));
+//remove
+app.delete('/user/:id', api.userDelete(sequelize, user));
+//update user -- remove parameter userid
+app.put('/user', api.userUpdate(sequelize, user));
+
+app.post('/signin', api.userLogin(sequelize, user));
+app.post('/forgot', api.forgot(sequelize, user));
+
+app.post('/blurb', api.blurbAdd(sequelize, blurb));
+app.get('/blurb', api.blurbAll(sequelize, blurb));
+app.get('/blurb/:id', api.blurbOne(sequelize, blurb));
+app.delete('/blurb/:id', api.blurbDelete(sequelize, blurb));
+app.put('/blurb/:id', api.blurbUpdate(sequelize, blurb));
+
+//get blurb detail by blurbid along with user detail (user who created the blurb)
+app.get('/blurb/detail/:id', api.blurbGet(sequelize, blurb));
+//get all offers by blurb id
+app.get('/blurb/offer/:id', api.blurbofferHistory(sequelize, offer));
+//get all blurbs by userid  -- remove parameter userid
+app.get('/blurb/allblurb/:user_id', api.allBlurb(sequelize, blurb));
+
+app.post('/offer', api.offerAdd(sequelize, offer));
+app.get('/offer', api.offerGet(sequelize, offer));
+//get current bid for blurb id
+app.get('/offer/maxoffer/:id', api.maxofferbyblurbid(sequelize, offer));
+
+app.post('/subscribe', api.subscribeAdd(sequelize, subscribe));
+app.post('/checkSubscription', api.checkSubscription(sequelize, subscribe));
+
+// Logot API
+app.get('/logout', function (req, res) {
+    //req.session.destroy()
+    req.logout()
+    res.redirect('/');
+});
+
+
+
+//fs.readdirSync('./app/controller').forEach(function (file) {
+//    if (file.substr(-3) == '.js') {
+//        route = require('./app/controller/' + file);
+//        route.controller(app, checkAuth);
+//    }
+//});
+
+
+
+// redirect all others to the index (HTML5 history)
+app.get('*', routes.index);
+
+// Start server
+app.listen(3000, function () {
+	console.log("Express server listening on port %d in %s mode", this.address().port, app.settings.env);
+});

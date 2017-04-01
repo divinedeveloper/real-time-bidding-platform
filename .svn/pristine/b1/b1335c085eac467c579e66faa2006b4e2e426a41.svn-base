@@ -1,0 +1,97 @@
+module.exports = function (sequelize, DataTypes) {
+    return sequelize.define('User', {
+        usertype: {
+            type: Sequelize.ENUM('MERCHANT', 'BIDDER'),
+            defaultValue: 'BIDDER',
+            allowNull: true,
+            validate: {
+                is: ["^[a-z]+$", 'i'],
+                isUppercase: true,
+                notNull: false
+            }
+        },
+        name: {
+            type: Sequelize.STRING,
+            allowNull: true,
+            validate: {
+                is: ["^[a-z]+$", 'i'],
+                notNull: false,
+                len: {
+                    args: 3,
+                    msg: "Name must be atleast 3 characters in length"
+                }
+            }
+        },
+        email: {
+            type: Sequelize.STRING,
+            allowNull: false,
+            unique: true,
+            validate: {
+                notEmpty: true,
+                notNull: true,
+                len: {
+                    args: [6, 128],
+                    msg: "Email address must be between 6 and 128 characters in length"
+                },
+                isEmail: {
+                    msg: "Email address must be valid"
+                }
+            }
+        },
+        password: {
+            type: Sequelize.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: true,
+                notNull: true,
+                len: {
+                    args: 3
+                }
+            }
+        },
+        companyname: {
+            type: Sequelize.STRING,
+            allowNull: true,
+            validate: {
+                notNull: false,
+                len: {
+                    args: 3,
+                    msg: "Name must be atleast 3 characters in length"
+                }
+            }
+        },
+        phone: {
+            type: Sequelize.STRING,
+            allowNull: true,
+            validate: {
+                isNumeric: true,
+                notNull: false,
+                len: {
+                    args: 10,
+                    msg: "Phone Number must be atleast 10 Integer in length"
+                }
+            }
+        },
+        description: {
+            type: Sequelize.TEXT,
+            allowNull: true,
+            validate: {
+                notNull: false
+            }
+        },
+        logo: {
+            type: Sequelize.STRING,
+            allowNull: true,
+            validate: {
+                notNull: false
+            }
+        },
+        delflag: {
+            type: Sequelize.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
+            validate: {
+                notNull: true
+            }
+        }
+    });

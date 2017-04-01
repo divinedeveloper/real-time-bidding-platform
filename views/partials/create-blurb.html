@@ -1,0 +1,64 @@
+<div class="container" ng-controller="CreateBlurbCtrl">
+    <div class="messages">
+        <span class="error-message" ng-bind="errorMessage"></span>
+    </div>
+      
+    <form name="createblurbform">
+      <!--<div class="form-group">
+        <label>
+            Link &nbsp;&nbsp;
+        </label>
+        <div class="input-group">
+          <span class="input-group-addon">blurb.io/username/</span>
+          <input type="text" class="form-control" placeholder="the-rest-of-the-link" ng-model="blurbLink" name="blurbLink">
+            <span class="control-group error">
+                <span class="error" ng-show="createblurbform.blurbLink.$error.required">Required!</span>
+            </span>
+        </div>
+      </div>-->
+      <div class="form-group">
+        <label>
+          Minimum Offer
+        </label>
+        <input type="number" class="form-control" placeholder="Enter minimum offer" ng-model="minimumOffer" name="minimumOffer" 
+                 ng-required="true">
+          <span class="control-group error">
+            <span class="error" ng-show="createblurbform.minimumOffer.$error.required">Required Only numeric values</span>
+            <span class="error" ng-show="createblurbform.minimumOffer.$error.number">Only numeric values allowed</span>
+        </span>
+      </div>
+      <div class="form-group">
+        <label>
+          Title
+        </label>
+        <input type="text" class="form-control" placeholder="Please enter title" ng-model="blurbTitle" name="blurbTitle" 
+                 ng-required="true">
+            <span class="control-group error">
+                <span class="error" ng-show="createblurbform.blurbTitle.$error.required">Required!</span>
+            </span>
+      </div>
+      <div class="form-group">
+        <label>
+          Description
+        </label>
+        <textarea class="form-control" ng-model="blurbDescription" name="blurbDescription"></textarea>
+      </div>
+      <div class="form-group">
+        <label>
+          URL
+        </label>
+        <input type="url" class="form-control" placeholder="Please enter link" ng-model="blurbUrlLink" name="blurbUrlLink">
+        <span class="control-group error">
+                <span class="error" ng-show="createblurbform.blurbUrlLink.$error.url">Not valid url or http protocol is required!</span>
+        </span>
+      </div>
+      <div class="form-group">
+        <label>
+          Upload file
+        </label>
+            <input type="file" class="form-control" ng-file-select="onFileSelect($files)" accept="application/pdf">
+     </div>
+      <a id="create-blurb-link" href ng-disabled="!createblurbform.$valid" ng-click="createBlurb()" 
+         class="btn btn-lg btn-primary">Create</a>
+    </form>
+    </div>

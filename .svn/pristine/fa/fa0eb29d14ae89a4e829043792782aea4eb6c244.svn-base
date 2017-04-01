@@ -1,0 +1,48 @@
+<div class="container" ng-controller="SignUpCtrl">
+    <div class="messages">
+        <span class="error-message" ng-bind="errorMessage"></span>
+    </div>
+    <form name="signupform">
+      <div class="form-group">
+      </div>
+      <h3>
+        Sign up
+      </h3>
+      <div class="form-group">
+        <label>
+          Name
+        </label>
+        <input type="text" class="form-control" name="signupname" ng-model="signupname" ng-required="true"
+               placeholder="Please enter your name">
+        <span class="control-group error">
+            <span class="error" ng-show="signupform.signupname.$error.required">Required!</span>
+        </span>
+      </div>
+      <div class="form-group">
+        <label>
+          Email
+        </label>
+        <input type="email" class="form-control" name="signupemail" ng-model="signupemail" ng-required="true"
+               ng-trim="true" placeholder="Please enter valid email">
+        <span class="control-group error">
+            <span class="error" ng-show="signupform.signupemail.$error.required">Required!</span>
+            <span class="error" ng-show="signupform.signupemail.$error.email">Not valid email!</span>
+        </span>
+      </div>
+      <div class="form-group">
+        <label>
+          Password
+        </label>
+        <input type="password" class="form-control" name="signuppassword" ng-model="signuppassword" ng-required="true"
+               ng-minlength="3" placeholder="Please enter password">
+          <span class="control-group error">
+            <span class="error" ng-show="signupform.signuppassword.$error.required">Required!</span>
+            <span class="error" ng-show="signupform.signuppassword.$error.minlength">Minimum password length must be 3!</span>
+        </span>
+      </div>
+      <div class="form-group">
+        <a id="sign-up-link" href ng-disabled="!signupform.$valid" ng-click="signUp()" class="btn btn-lg btn-primary">Sign up</a>
+      </div>
+    </form>
+      <a id="sign-in-link" href ng-click="goToSignIn()" class="btn btn-lg btn-default">Already have an account?</a>
+    </div>

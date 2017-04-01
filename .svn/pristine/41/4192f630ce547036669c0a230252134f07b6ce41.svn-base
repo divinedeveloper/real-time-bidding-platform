@@ -1,0 +1,109 @@
+'use strict';
+
+/* Controllers */
+
+
+/*myApp.controller('AppCtrl', ['$scope', '$http', function($scope, $http) {
+	$http({method: 'GET', url: '/api/name'}).
+	success(function(data, status, headers, config) {
+    	$scope.name = data.name;
+  	}).
+  	error(function(data, status, headers, config) {
+    	$scope.name = 'Error!'
+  	});
+        $scope.successMessage="";
+    $scope.errorMessage="";
+        
+    $scope.getBlurbsList = function(){
+       $http({method: 'GET', url: '/api/offer'}).
+	success(function(data, status, headers, config) {
+        if(data.rows.length > 0){
+    	   $scope.blurb_list = data.rows;
+        }else{
+            $scope.errorMessage = 'No Blurbs found'
+        }
+  	}).
+  	error(function(data, status, headers, config) {
+    	$scope.errorMessage = 'Error!'
+  	}); 
+    }
+}]);
+
+myApp.controller('MyCtrl1', ['$scope', '$http', function($scope, http) {
+
+}]);
+
+myApp.controller('MyCtrl2', ['$scope', '$http', function($scope, http) {
+
+}]);*/
+
+
+myApp.controller('AppCtrl', ['$scope', '$http', '$rootScope', '$location','$localStorage', function($scope, $http, $rootScope, $location, $localStorage) {
+	$scope.init = function () {
+        $location.path("/");
+    }
+    
+    $scope.guest;
+    $scope.bidder;
+    $scope.merchant;
+    $scope.loggedInEmail;
+//    alert($localStorage.email);
+    $rootScope.user.email = $localStorage.email;
+    $rootScope.user.usertype = $localStorage.usertype;
+    if($rootScope.user.usertype === "BIDDER" && ($rootScope.user.email != null && $rootScope.user.email != "")){
+        $scope.bidder = true;
+        $scope.guest = false;
+        $scope.merchant = false;
+        $scope.loggedInEmail = $rootScope.user.email;
+    }
+    if($rootScope.user.usertype === "MERCHANT" && ($rootScope.user.email != null && $rootScope.user.email != "")){
+        $scope.merchant = true;
+        $scope.guest = false;
+        $scope.bidder = false;
+        $scope.loggedInEmail = $rootScope.user.email;
+    }
+    if($rootScope.user.usertype == null || $rootScope.user.usertype == ""){
+        $scope.guest = true;
+        $scope.bidder = false; 
+        $scope.merchant = false;
+    }
+    
+    $scope.getSignIn = function(){
+        $location.path("/signin");
+    }
+    
+    
+}]);
+    
+
+myApp.controller('BlurbsListCtrl', ['$scope', '$http', '$location', '$rootScope', function($scope, $http, $location, $rootScope) {
+	$scope.successMessage="";
+    $scope.errorMessage="";
+    
+        
+    $scope.getBlurbsList = function(){
+       $http({method: 'GET', url: '/offer'}).
+	   success(function(data, status, headers, config) {
+        if(data.response.length > 0){
+    	   $scope.blurb_list = data.response;
+        }else{
+            $scope.errorMessage = 'No Blurbs found'
+        }
+  	}).
+  	error(function(data, status, headers, config) {
+    	$scope.errorMessage = 'Error!'
+  	}); 
+    }
+    
+    $scope.getSignIn = function(){
+        $location.path("/signin");
+    }
+    
+    $scope.goToHomePage= function(){
+        $location.path("/");
+    }
+    
+}]);
+
+function BlurbDetailCtrl($scope, $http){
+}

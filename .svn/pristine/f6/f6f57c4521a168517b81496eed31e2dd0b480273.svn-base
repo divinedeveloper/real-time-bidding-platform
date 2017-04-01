@@ -1,0 +1,71 @@
+myApp.controller('BlurbDetailCtrl', ['$scope', '$http', '$location', '$rootScope', '$routeParams', function($scope, $http, $location, $rootScope, $routeParams) {
+	$scope.successMessage="";
+    $scope.errorMessage="";
+    
+    $scope.getDetails = function(){
+    if($routeParams.id){
+            var blurbId = $routeParams.id;
+            $http({method: 'GET', url: '/blurb/detail/' + parseInt(blurbId)}).
+                success(function(data, status, headers, config) {
+                       if(status == 200 && data.message == "Available Blurb"){
+//                           alert(data.response.length); 
+                           $scope.blurb = data.response;
+                       }else{
+                           $scope.errorMessage = data.message;
+                       }
+
+                     }).
+                error(function(data, status, headers, config) {
+                   $scope.errorMessage = data.message;
+                 }); 
+        
+            
+        $http({method: 'GET', url: '/blurb/offer/' + parseInt(blurbId)}).
+                success(function(data, status, headers, config) {
+                       if(status == 200 && data.message == "Offer Available On Blurbs"){
+                           if(data.response.length >= 0){ 
+                            $scope.offerList = data.response;
+                           }else{
+                               $scope.errorMessage = data.message;
+                           }
+                       }else{
+                           $scope.errorMessage = data.message;
+                       }
+
+                     }).
+                error(function(data, status, headers, config) {
+                   $scope.errorMessage = data.message;
+                 }); 
+            
+        
+        }else{
+            $scope.errorMessage = "Blurb not found";
+        }  
+    }
+    
+    
+    /*$scope.getBlurbsList = function(){
+       $http({method: 'GET', url: '/offer'}).
+	   success(function(data, status, headers, config) {
+        if(data.response.length > 0){
+    	   $scope.blurb_list = data.response;
+        }else{
+            $scope.errorMessage = 'No Blurbs found'
+        }
+  	}).
+  	error(function(data, status, headers, config) {
+    	$scope.errorMessage = 'Error!'
+  	}); 
+    }*/
+    
+        
+    $scope.placeBid = function(id){
+        if($rootScope.user){
+            $routeParams.id = id;
+            $location.path("/makeoffer/" + $routeParams.id);
+        }else{
+            $location.path("/signin");
+        }
+    }
+    
+}]);

@@ -1,0 +1,183 @@
+myApp.controller('BlurbDetailCtrl', ['$scope', '$http', '$location', '$rootScope', '$routeParams', 'PubNub', '$localStorage', function($scope, $http, $location, $rootScope, $routeParams, PubNub, $localStorage) {
+	$scope.successMessage="";
+    $scope.errorMessage="";
+    $scope.offerList=[];
+    
+//    $scope.channel = 
+    
+    $scope.getDetails = function(){
+    if($routeParams.id){
+            var blurbId = $routeParams.id;
+            $http({method: 'GET', url: '/blurb/detail/' + parseInt(blurbId)}).
+                success(function(data, status, headers, config) {
+                       if(status == 200 && data.message == "Available Blurb"){
+//                           alert(data.response.length); 
+                           $scope.blurb = data.response;
+                       }else{
+                           $scope.errorMessage = data.message;
+                       }
+
+                     }).
+                error(function(data, status, headers, config) {
+                   $scope.errorMessage = data.message;
+                 }); 
+        
+            
+        $http({method: 'GET', url: '/blurb/offer/' + parseInt(blurbId)}).
+                success(function(data, status, headers, config) {
+                       if(status == 200 && data.message == "Offer Available On Blurbs"){
+                           if(data.response.length >= 0){ 
+                            $scope.offerList = data.response;
+                           }else{
+                               $scope.errorMessage = data.message;
+                           }
+                       }else{
+                           $scope.errorMessage = data.message;
+                       }
+
+                     }).
+                error(function(data, status, headers, config) {
+                   $scope.errorMessage = data.message;
+                 });
+        
+        $http({method: 'GET', url: '/checkSubscription/'+$routeParams.id}).
+               success(function(data, status, headers, config) {
+                if(data.message == "Subscriber exists"){
+                    $scope.successMessage = data.message;
+                    PubNub.ngSubscribe({ channel: "blurbid:"+$routeParams.id })
+                    $localStorage.subscribedUser = data.response;
+                    $rootScope.subscribedUser = $localStorage.subscribedUser;
+                }else{
+//                    $scope.subscribe(id);
+                }
+            }).
+            error(function(data, status, headers, config) {
+                if(status == 401){
+                    $scope.errorMessage = data.message;
+                }
+                if(status == 400){
+                    $scope.errorMessage = data.message;
+                }
+                if(status == 500){
+                    $scope.errorMessage = data.message;
+                }
+                if(status == 404){
+                    $scope.errorMessage = data.message;
+                }
+            }); 
+            
+        
+        }else{
+            $scope.errorMessage = "Blurb not found";
+        }  
+    }
+   
+    if (!$rootScope.initialized) {
+    // Initialize the PubNub service
+        PubNub.init({
+    //                publish_key:'your pub key',
+                    subscribe_key:'demo',
+    //                uuid:'an_optional_user_uuid'
+                });
+         $rootScope.initialized = true;
+    }
+    
+   /* PubNub.ngSubscribe({ channel: "blurbid:1" })
+            
+            $rootScope.$on(PubNub.ngMsgEv("blurbid:1"), function(event, payload) {
+                $scope.$apply(function() {
+                    console.log('got a message event:', payload);
+                    $scope.offerList.push(payload.message);
+                });
+            });*/
+        
+    $scope.placeBid = function(id){
+        if($rootScope.user){
+            $routeParams.id = id;
+            $location.path("/makeoffer/" + $routeParams.id);
+        }else{
+            $location.path("/signin");
+        }
+    }
+    
+    $scope.subscribe = function(id){
+        if($rootScope.user){
+            var subscribeData = {}
+            subscribeData.blurb_Id = id;
+//            $routeParams.id = id;
+            $http({method: 'POST', url: '/subscribe', data: subscribeData}).
+               success(function(data, status, headers, config) {
+                if(data.message == "Subscriber Stored Successfully !!"){
+                    $scope.errorMessage ="";
+                    $scope.successMessage = data.message;
+                    $localStorage.subscribedUser = data.response;
+                    $rootScope.subscribedUser = $localStorage.subscribedUser;    
+                    PubNub.ngSubscribe({ channel: "blurbid:"+id })
+                }else{
+                    $scope.errorMessage = data.message;
+                }
+            }).
+            error(function(data, status, headers, config) {
+                $scope.errorMessage = 'Error!'
+            }); 
+            
+     }else{
+            $location.path("/signin");
+        }
+    }
+    
+    if($rootScope.subscribedUser || $localStorage.subscribedUser){
+        PubNub.ngSubscribe({ channel: "blurbid:"+$routeParams.id })
+    }
+    
+    $rootScope.$on(PubNub.ngMsgEv("blurbid:"+ $routeParams.id), function(event, payload) {
+                $scope.$apply(function() {
+//                    console.log('got a message event:', payload);
+                    if($rootScope.subscribedUser || $localStorage.subscribedUser){
+                        $scope.offerList.push(payload.message);
+                    }
+                });
+            });
+    
+    /*$scope.download = function(){
+        $http({method: 'GET', url: '/blurbfiledownload/', + parseInt($routeParams.id)}).
+               success(function(data, status, headers, config) {
+                
+            }).
+            error(function(data, status, headers, config) {
+                $scope.errorMessage = 'Error!'
+            });
+        
+        window.open(resource);
+    }*/
+    
+    $scope.unSubscribe = function(blurbId){
+        
+       
+        if($rootScope.subscribedUser){
+           
+            $http({method: 'DELETE', url: '/unsubscribe/' + parseInt($localStorage.subscribedUser.id)}).
+               success(function(data, status, headers, config) {
+                if(data.message == "Unsubscribed Successfully"){
+                    
+                    $localStorage.subscribedUser = null;
+                    $rootScope.subscribedUser = null;    
+                    //unsubscribe from pubnub
+                    PubNub.ngUnsubscribe({channel: "blurbid:"+blurbId })
+                    $scope.errorMessage ="";
+                    $scope.successMessage = data.message;
+                }else{
+                    $scope.errorMessage = data.message;
+                }
+            }).
+            error(function(data, status, headers, config) {
+                $scope.errorMessage = data.message;
+            }); 
+            
+     }else{
+            alert("OOps!!, You were not subscribed to this blurb");
+            $location.path("/blurb-detail/" +blurbId);
+        }
+    }
+    
+}]);

@@ -1,0 +1,40 @@
+<div ng-controller="EditBlurb1Ctrl">
+    <div class="messages">
+            <span class="success-message" ng-bind="successMessage"></span>
+            <span class="error-message" ng-bind="errorMessage"></span>
+         </div>
+    <div class="container" ng-init="getBlurbsListForUser()">
+         <table class="table">
+            <tbody>
+              <tr>
+              </tr>
+            </tbody>
+          </table>
+          <div class="row" ng-repeat="blurb in user_blurb_list">
+            <div class="col-md-6">
+              <h5>
+                {{blurb.title}}
+              </h5>
+            </div>
+            <div class="col-md-6">
+              <a id="edit-blurb-link" class="btn btn-primary" href ng-click="goToEditBlurb(blurb.id)">Edit</a>
+            </div>
+          </div>
+          <!--<div class="row">
+            <div class="col-md-6">
+              <h5>
+                Jenner House, Flat 26
+              </h5>
+            </div>
+            <div class="col-md-6">
+              <a href="#" class="btn btn-primary">Edit</a>
+            </div>
+          </div>-->
+          <table class="table">
+            <tbody>
+              <tr>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+</div>

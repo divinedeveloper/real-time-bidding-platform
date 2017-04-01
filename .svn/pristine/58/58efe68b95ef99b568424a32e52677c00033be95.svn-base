@@ -1,0 +1,44 @@
+<div class="container" ng-controller="SignInCtrl">
+    <div class="messages">
+        <span class="error-message" ng-bind="errorMessage"></span>
+    </div>
+    <form name="signinform">
+      <div class="form-group">
+        <h3>
+          Sign in
+        </h3>
+        <label>
+          Email
+        </label>
+        <input type="email" class="form-control" name="signinemail" ng-model="signinemail" ng-required="true"
+               placeholder="Please enter valid email">
+        <span class="control-group error">
+            <span class="error" ng-show="signinform.signinemail.$error.required">Required!</span>
+            <span class="error" ng-show="signinform.signinemail.$error.email">Not valid email!</span>
+        </span>
+
+      </div>
+      <div class="form-group">
+        <label>
+          Password
+        </label>
+        <input type="password" class="form-control" name="signinpasword" ng-model="signinpasword" ng-required="true"
+               ng-minlength="3" placeholder="Please enter password">
+          <span class="control-group error">
+            <span class="error" ng-show="signinform.signinpasword.$error.required">Required!</span>
+            <span class="error" ng-show="signinform.signinpasword.$error.minlength">Minimum password length must be 3!</span>
+        </span>
+      </div>
+      <div class="form-group">
+        <a id="sign-in-link" href ng-disabled="!signinform.$valid" ng-click="signIn()" class="btn btn-lg btn-primary">Sign In</a>
+          
+<!--
+        <button ng-disabled="!signinform.$valid" ng-click="signIn()" type="submit" class="btn btn-lg btn-primary">Sign In</button>
+-->
+        <a id="forgot-password-link" href ng-click="getForgotPassword()" class="btn btn-lg btn-default">Forgot password</a>
+      </div>
+    </form>
+      <div class="form-group">
+        <a id="sign-up-link" href ng-click="goToSignUp()" class="btn btn-lg btn-default">Don't have an account?</a>
+      </div>
+    </div>

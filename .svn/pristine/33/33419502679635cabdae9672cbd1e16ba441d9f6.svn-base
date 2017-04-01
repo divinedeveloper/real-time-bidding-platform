@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp">
+  
+  <head>
+    <meta charset="utf-8">
+    <base href="/">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Blurbs
+    </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!--<link href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"
+    rel="stylesheet">-->
+    <link href="/css/bootstrap-3.0.0.min.css" rel="stylesheet">
+    <link href="/css/bootstrap-glyphicons-3.0.0.css" rel="stylesheet">
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+      <script type="text/javascript" src="js/lib/jquery/jquery-1.11.1.min.js"></script>
+    
+    <!--<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.21/angular.min.js"></script>
+    <script type="text/javascript" src="js/controllers.js"></script> -->
+
+    <script type="text/javascript" src="js/directive/angular-file-upload-shim.min.js"></script>
+    <script type="text/javascript" src="js/directive/pubnub.min.js"></script>  
+    <script type="text/javascript" src="js/lib/angular/angular.js"></script>
+    <script type="text/javascript" src="js/directive/pubnub-angular.js"></script>
+    <script type="text/javascript" src="js/directive/angular-file-upload.min.js"></script>
+    <script type="text/javascript" src="js/lib/angular/angular-route.js"></script>
+    <script type="text/javascript" src="js/directive/ngStorage.js"></script>
+    <script type="text/javascript" src="js/directive/ng-environments.min.js"></script>
+    <!--<script type="text/javascript" src="js/directive/restangular.min.js"></script>
+    <script type="text/javascript" src="js/directive/toaster.js"></script>-->
+    <script type="text/javascript" src="js/app.js"></script>
+    <script type="text/javascript" src="js/config.js"></script>
+    <script type="text/javascript" src="js/services.js"></script>
+    <script type="text/javascript" src="js/filters.js"></script>
+    <script type="text/javascript" src="js/directives.js"></script>
+  </head>
+  
+  <body>
+    <div ng-controller="AppCtrl">
+    <nav class="navbar navbar-default" role="navigation">
+      <div class="navbar-header">
+        <a id="home-link" href ng-click="goToHomePage()" class="navbar-brand">Blurb.io</a>
+      </div>
+      <div class="collapse navbar-collapse navbar-ex1-collapse">
+        <ul class="nav navbar-nav">
+          <li class="active">
+            <a id="create-blurb-link" href ng-click="goToCreateBlurb()" 
+               ng-show="$root.user.usertype === 'MERCHANT'">Create Blurb</a>
+          </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+              <a id="edit-link" href ng-click="goToEdit()" class="pull-right" 
+                 ng-show="$root.user.usertype === 'MERCHANT'">Edit</a>
+          </li>
+          <li>
+              <a id="account-link" href ng-click="goToAccount()" class="pull-right" 
+                 ng-show="$root.user.usertype === 'MERCHANT'">Account</a>
+          </li>
+          <li>
+              <a id="email-link" href ng-show="$root.user.usertype === 'MERCHANT' || $root.user.usertype === 'BIDDER'">{{user.email}}</a>
+          </li>
+          <li>
+              <a id="signin-link" href ng-click="getSignIn()" class="pull-right" ng-show="$root.user == null">Sign In</a>
+              <a id="signout-link" href ng-click="signOut()" class="pull-right" 
+                 ng-show="$root.user.usertype === 'MERCHANT' || $root.user.usertype === 'BIDDER'">Sign Out</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div ng-view></div>
+    
+    </div>
+      <script type="text/javascript" src="js/controllers.js"></script>
+      <script type="text/javascript" src="js/controllers/SignInCtrl.js"></script>
+      <script type="text/javascript" src="js/controllers/SignUpCtrl.js"></script>      
+      <script type="text/javascript" src="js/controllers/ForgotPasswordCtrl.js"></script>
+      <script type="text/javascript" src="js/controllers/CreateBlurbCtrl.js"></script>
+      <script type="text/javascript" src="js/controllers/EditBlurb1Ctrl.js"></script>
+      <script type="text/javascript" src="js/controllers/EditBlurb2Ctrl.js"></script>
+      <script type="text/javascript" src="js/controllers/BlurbDetailCtrl.js"></script>
+      <script type="text/javascript" src="js/controllers/MakeOfferCtrl.js"></script>
+      <script type="text/javascript" src="js/controllers/CreateCompanyCtrl.js"></script>
+      <script type="text/javascript" src="js/lib/bootstrap/bootstrap-3.0.0.min.js"></script>
+<!--
+      <script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+-->
+  </body>
+
+</html>

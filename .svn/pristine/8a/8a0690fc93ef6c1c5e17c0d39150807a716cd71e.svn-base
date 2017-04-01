@@ -1,0 +1,58 @@
+<div ng-controller="EditBlurb2Ctrl">
+    <div class="container" ng-init="getBlurbDetails()">
+        <div class="messages">
+            <span class="error-message" ng-bind="errorMessage"></span>
+        </div>
+        <form name="editblurbform">
+          <!--<label>
+            Link &nbsp;&nbsp;
+          </label>
+          <div>
+            blurb.io/username/:id{{blurb.link}}
+          </div>-->
+          <div class="form-group">
+            <div class="input-group">
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-group">
+              <label>
+                Minimum Offer
+                <div>
+                  <span style="font-weight: normal;">£{{blurb.minoffer}}</span>
+                </div>
+              </label>
+            </div>
+            <label>
+              Title
+            </label>
+            <input type="text" class="form-control"  placeholder="Please enter title" ng-model="blurb.title" name="blurbTitle" 
+                     ng-required="true">
+                <span class="control-group error">
+                    <span class="error" ng-show="editblurbform.blurbTitle.$error.required">Required!</span>
+                </span>
+          </div>
+          <div class="form-group">
+            <label>
+              Description
+            </label>
+              <textarea class="form-control" ng-model="blurb.description" name="blurbDescription"></textarea>
+          </div>
+          <div class="form-group">
+            <label>
+              URL
+            </label>
+            <input type="text" class="form-control" placeholder="Please enter link" ng-model="blurb.url" name="blurbUrlLink">
+          </div>
+          <div class="form-group">
+            <label>
+              Upload file
+            </label>
+            <input type="file" class="form-control" ng-file-select="onUpdateFileSelect($files)">{{blurb.orgfilename}}
+          </div>
+            <a id="update-blurb-link" href ng-disabled="!editblurbform.$valid" ng-click="updateBlurb(blurb)" 
+             class="btn btn-lg btn-primary">Save</a>
+            <a id="delete-blurb-link" href ng-click="deleteBlurb()" class="btn btn-lg btn-primary">Delete</a>
+        </form>
+        </div>
+    </div>

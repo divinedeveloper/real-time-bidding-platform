@@ -1,0 +1,61 @@
+<div ng-controller="CreateCompanyCtrl">
+    <div class="container" ng-init="checkMerchantExists()">
+        <div class="messages">
+            <span class="error-message" ng-bind="errorMessage"></span>
+        </div>
+          <div class="form-group">
+            <div class="input-group">
+            </div>
+          </div>
+        <form name="createcompanyform">
+          <!--<div class="form-group">
+            <div class="input-group">
+              <span class="input-group-addon">blurb.io/</span>
+                <input type="text" class="form-control" placeholder="username" ng-model="username" name="username">
+            </div>
+          </div>-->
+          <div class="form-group">
+            <label>
+              Company Name
+            </label>
+            <input type="text" class="form-control" placeholder="Please enter company name" ng-model="companyName"
+                   name="companyName" ng-required="true">
+                <span class="control-group error">
+                    <span class="error" ng-show="createcompanyform.companyName.$error.required">Required!</span>
+                </span>
+          </div>
+            <div class="form-group">
+            <label>
+              Phone
+            </label>
+            <input type="number" class="form-control" placeholder="Enter phone no." ng-model="companyPhone" name="companyPhone" 
+                     ng-required="true">
+              <span class="control-group error">
+                <span class="error" ng-show="createcompanyform.companyPhone.$error.required">Required!</span>
+                <span class="error" ng-show="createcompanyform.companyPhone.$error.number">Only numeric values allowed</span>
+            </span>
+          </div>
+          <div class="form-group">
+            <label>
+              Company Description
+            </label>
+              <input type="text" class="form-control" placeholder="Please enter company description" 
+                     ng-model="companyDescription" name="companyDescription" ng-required="true">
+              <span class="control-group error">
+                    <span class="error" ng-show="createcompanyform.companyDescription.$error.required">Required!</span>
+                </span>
+          </div>
+          <div class="form-group">
+            <label>
+              Upload logo
+            </label>
+              <input type="file" class="form-control" ng-file-select="onImageSelect($files)" accept="image/*">{{companyLogo}}
+              
+              
+              
+          </div>
+           <a id="create-company-link" href ng-disabled="!createcompanyform.$valid" ng-click="createCompany()" 
+             class="btn btn-lg btn-primary">Save</a>
+            </form>
+        </div>
+</div>

@@ -1,0 +1,44 @@
+myApp.controller('EditBlurb2Ctrl', ['$scope', '$http', '$location', '$routeParams', function($scope, $http, $location, $routeParams) {
+        $scope.successMessage;
+        $scope.errorMessage;
+    $scope.fileuploaded = "";
+//        alert($routeParams.blurb_id);
+    if($routeParams.blurb_id){
+                        var blurbId = $routeParams.blurb_id;
+            $http({method: 'GET', url: '/blurbs/' + parseInt(blurbId)}).
+                success(function(data, status, headers, config) {
+                       if(status == 200 && data.message == "Available Blurb"){
+//                           alert(data.response.length); 
+                           $scope.blurb = data.response;
+                       }else{
+                           $scope.errorMessage = data.message;
+                       }
+
+                     }).
+                error(function(data, status, headers, config) {
+                   $scope.errorMessage = data.message;
+                 }); 
+        
+        }else{
+            $scope.errorMessage = "Blurb not found";
+        }
+        
+        /*$scope.goToEditBlurb = function(id){
+            $routeParams.blurb_id = id;
+            $location.path("/edit/" +$routeParams.blurb_id);
+        }*/
+    
+    //file upload starts
+        $scope.onFileSelect = function ($files) {
+            
+            //$files: an array of files selected, each file has name, size, and type.
+            for (var i = 0; i < $files.length; i++) {
+                var file = $files[i];
+                $scope.fileuploaded = file
+
+                //.error(...)
+                //.then(success, error, progress); 
+                //.xhr(function(xhr){xhr.upload.addEventListener(...)})// access and attach any event listener to XMLHttpRequest.
+            }
+        }
+}]);

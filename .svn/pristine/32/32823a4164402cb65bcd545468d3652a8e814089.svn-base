@@ -1,0 +1,103 @@
+myApp.controller('SignUpCtrl', ['$scope', '$http', '$location', function($scope, $http, $location) {
+        $scope.errorMessage;
+        var flag;
+        $scope.signUp = function(){
+                        
+            if($scope.signupname!="" && $scope.signupemail!="" && $scope.signuppassword!=""){
+                var signUpData = {}
+                signUpData.name = $scope.signupname;
+                signUpData.email = $scope.signupemail;
+                signUpData.password= $scope.signuppassword;
+                
+                //check email already exists or not
+//                flag = $scope.checkMail(signUpData.email);
+                
+                var emailJson = {}
+                emailJson.email = signUpData.email;
+                
+                $http({method: 'POST', url: '/checkemail', data: emailJson}).
+                   success(function(data, status, headers, config) {
+                       if(status == 200 && data.message=="E-Mail Already Exists" && data.response == signUpData.email ){
+                           $scope.errorMessage = data.message;
+//                           flag = false;
+//                           return flag;
+                       }else{
+//                           flag = true;
+//                           return flag;
+                           $http({method: 'POST', url: '/signup', data: signUpData}).
+                   success(function(data, status, headers, config) {
+                           if(status == 200 ){
+                           /*alert('data.message   ' +data.message);
+                           alert('data.response.usertype '+data.response.usertype);*/
+                           $location.path("/signin");
+
+                       }else{
+                           $scope.errorMessage = data.message;
+                       }
+
+                     }).
+                 error(function(data, status, headers, config) {
+                   $scope.errorMessage = data.message;
+                 });
+                       }
+
+                     }).
+                 error(function(data, status, headers, config) {
+                   $scope.errorMessage = data.message;
+                 }); 
+                
+                
+                
+                
+                
+                /*if(flag){
+                 $http({method: 'POST', url: '/signup', data: signUpData}).
+                   success(function(data, status, headers, config) {
+                           if(status == 200 ){
+                           alert('data.message   ' +data.message);
+                           alert('data.response.usertype '+data.response.usertype);
+                           $location.path("/signin");
+
+                       }else{
+                           $scope.errorMessage = data.message;
+                       }
+
+                     }).
+                 error(function(data, status, headers, config) {
+                   $scope.errorMessage = data.message;
+                 });
+            }*/
+        }else{
+            $scope.errorMessage = "Please fillup all fields"
+        }
+
+
+
+        }
+        
+       /* $scope.checkMail = function(signUpEmail){
+             var emailJson = {}
+             emailJson.email = signUpEmail;
+             $http({method: 'POST', url: '/checkemail', data: emailJson}).
+                   success(function(data, status, headers, config) {
+                       if(status == 200 && data.message=="E-Mail Already Exists" && data.response == signUpEmail ){
+                           $scope.errorMessage = data.message;
+                           flag = false;
+                           return flag;
+                       }else{
+                           flag = true;
+                           return flag;
+                       }
+
+                     }).
+                 error(function(data, status, headers, config) {
+                   $scope.errorMessage = data.message;
+                 }); 
+        
+        }*/
+
+        $scope.goToSignIn = function(){
+            $location.path("/signin");
+        }
+    
+}]);

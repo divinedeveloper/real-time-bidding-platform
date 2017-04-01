@@ -1,0 +1,124 @@
+'use strict';
+
+// Declare app level module which depends on filters, and services
+var myApp = angular.module('myApp', ['myApp.filters', 'myApp.services', 'myApp.directives','ngRoute', 'ngStorage', 'angularFileUpload', 'pubnub.angular.service', 'ng-environments', 'ngAnimate', 'toaster', 'imageupload']).
+ 	config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider, $rootScope) {
+        $routeProvider.when('/', {templateUrl: 'partials/blurbs-list', controller: 'BlurbsListCtrl'});
+	    $routeProvider.when('/signin', {templateUrl: 'partials/sign-in', controller: 'SignInCtrl'});
+	    $routeProvider.when('/signup', {templateUrl: 'partials/sign-up', controller: 'SignUpCtrl'});
+        $routeProvider.when('/forgot', {templateUrl: 'partials/forgot-password', controller: 'ForgotPasswordCtrl'});
+        $routeProvider.when('/blurb-detail/:id', {templateUrl: 'partials/blurb-detail', controller: 'BlurbDetailCtrl'});
+        $routeProvider.when('/admin-create', {
+            templateUrl: 'partials/create-blurb', 
+            controller: 'CreateBlurbCtrl',
+            resolve: {
+                load: function (authorizationFactory) {
+                    return authorizationFactory.checkMerchant();
+                }
+            }
+        });
+        $routeProvider.when('/admin-blurbs', {
+            templateUrl: 'partials/eblurb1', 
+            controller: 'EditBlurb1Ctrl',
+            resolve: {
+                load: function (authorizationFactory) {
+                    return authorizationFactory.checkMerchant();
+                }
+            }
+        });
+        $routeProvider.when('/edit/:blurb_id', {
+            templateUrl: 'partials/eblurb2', 
+            controller: 'EditBlurb2Ctrl',
+            resolve: {
+                load: function (authorizationFactory) {
+                    return authorizationFactory.checkMerchant();
+                }
+            }
+        });
+        $routeProvider.when('/makeoffer/:id', {
+            templateUrl: 'partials/make-offer', 
+            controller: 'MakeOfferCtrl',
+             resolve: {
+                load: function (authorizationFactory) {
+                    return authorizationFactory.checkBidderOrMerchant();
+                }
+            }
+        });
+        $routeProvider.when('/create-company', {
+            templateUrl: 'partials/create-company', 
+            controller: 'CreateCompanyCtrl',
+            resolve: {
+                load: function (authorizationFactory) {
+                    return authorizationFactory.checkMerchant();
+                }
+            }
+        });
+        
+        $routeProvider.when('/page-not-found', {
+            templateUrl: 'partials/page-not-found'
+                       
+        });
+	    $routeProvider.otherwise({redirectTo: '/'});
+	    $locationProvider.html5Mode(true);
+  }]);
+
+myApp.run(function ($rootScope, $localStorage, $environment) {
+    console.log($environment);
+    console.log($environment.name);
+    console.log($environment.baseurl);
+//    "//localhost:3000"
+    $rootScope.baseurl = $environment.baseurl
+    $rootScope.user = $localStorage.user
+    $rootScope.subscribedUser = $localStorage.subscribedUser
+    
+//    $rootScope.$on('handleSubscribe', function(event, args) {
+//        $rootScope.$broadcast('subscribeBroadcast', args);
+//        console.log(args);
+//        alert(args);
+//      $scope.subscribe(args);
+//    })
+})
+
+myApp.factory('subscribeFactory', ['$http', function($http){
+    var subscribeFactory = {};
+    
+    subscribeFactory.insertSubscribe = function(id){
+        var subscribeData = {}
+        subscribeData.blurb_Id = id;
+        
+        return $http({method: 'POST', url: '/subscribe', data: subscribeData})
+    };
+    
+    return subscribeFactory;
+
+}]);
+
+myApp.factory('authorizationFactory', function ($q, $location, $rootScope) {
+//    return {
+    var authorizationFactory = {};
+    
+    authorizationFactory.checkMerchant = function () {
+            var defer = $q.defer();
+            //check for localstorage user also
+            if($rootScope.user && $rootScope.user.usertype === 'MERCHANT'){
+                defer.resolve();
+            }else{
+                $location.path('/')
+            }                   
+            return defer.promise;
+        }
+    
+    authorizationFactory.checkBidderOrMerchant = function () {
+            var defer = $q.defer();
+            //check for localstorage user also
+            if($rootScope.user && ($rootScope.user.usertype === 'BIDDER' || $rootScope.user.usertype === 'MERCHANT')){
+                defer.resolve();
+            }else{
+                $location.path('/')
+            }                   
+            return defer.promise;
+        }
+    
+    return authorizationFactory;
+//    };
+});

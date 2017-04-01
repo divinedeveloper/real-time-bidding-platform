@@ -1,0 +1,31 @@
+<div ng-controller="BlurbsListCtrl">
+    
+    <div class="messages">
+        <span class="success-message" ng-bind="successMessage"></span>
+        <span class="error-message" ng-bind="errorMessage"></span>
+    </div>
+    <div class="container" ng-init="getBlurbsList()">
+      <ul class="list-group">
+      </ul>
+      <ul class="list-group">
+        <li class="list-group-item">
+          <span class="badge">Offers placed</span>
+          <b>
+      Blurbs
+    </b>
+        </li>
+        <li class="list-group-item" ng-repeat="blurb in blurb_list">
+          <span class="badge" ng-bind="blurb.OffersPlaced"></span>
+          <a id="blurb-detail-link" href ng-click="goToBlurbDetail(blurb.id)">{{blurb.Blurbs}}</a>
+        </li>
+        <!--<li class="list-group-item">
+          <span class="badge">2</span>
+          Jenner House, Flat 53
+        </li>
+        <li class="list-group-item">
+          <span class="badge">1</span>
+          Something else
+        </li>
+-->      </ul>
+    </div>
+</div>

@@ -1,0 +1,56 @@
+<div ng-controller="BlurbsListCtrl">
+    <nav class="navbar navbar-default" role="navigation">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">Blurb.io</a>
+      </div>
+      <div class="collapse navbar-collapse navbar-ex1-collapse">
+        <ul class="nav navbar-nav">
+          <li>
+          </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+          </li>
+          <li>
+          </li>
+          <li>
+          </li>
+          <li>
+            <!--<a href="#" class="pull-right">Sign In</a>-->
+
+            <a id="link-1" href ng-click="getSignIn()" class="pull-right">Sign In</a>
+
+            <!--<input type="button" value="Sign In" ng-click="getSignIn()" class="pull-right"/>-->
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="messages">
+        <span class="success-message" ng-bind="successMessage"></span>
+        <span class="error-message" ng-bind="errorMessage"></span>
+    </div>
+    <div class="container" ng-init="getBlurbsList()">
+      <ul class="list-group">
+      </ul>
+      <ul class="list-group">
+        <li class="list-group-item">
+          <span class="badge">Offers placed</span>
+          <b>
+      Blurbs
+    </b>
+        </li>
+        <li class="list-group-item" ng-repeat="blurb in blurb_list">
+          <span class="badge" ng-bind="blurb.OffersPlaced"></span>
+          {{blurb.Blurbs}}
+        </li>
+        <!--<li class="list-group-item">
+          <span class="badge">2</span>
+          Jenner House, Flat 53
+        </li>
+        <li class="list-group-item">
+          <span class="badge">1</span>
+          Something else
+        </li>
+-->      </ul>
+    </div>
+</div>

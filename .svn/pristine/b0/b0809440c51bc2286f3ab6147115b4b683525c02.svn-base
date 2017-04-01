@@ -1,0 +1,39 @@
+myApp.controller('CreateBlurbCtrl', ['$scope', '$http', '$location', function($scope, $http, $location) {
+        $scope.errorMessage;
+
+        $scope.createBlurb = function(){
+            if($scope.minimumOffer!=""){
+                var createBlurbData = {}
+                createBlurbData.minoffer = $scope.minimumOffer;
+                createBlurbData.title = $scope.blurbTitle;
+                createBlurbData.description = $scope.blurbDescription;
+                createBlurbData.url = $scope.blurbUrlLink;
+                createBlurbData.fileName = "sidhome";
+//                createBlurbData.user_id = 9;
+                createBlurbData.link = $scope.blurbLink;
+                $http({method: 'POST', url: '/blurb', data: createBlurbData}).
+                   success(function(data, status, headers, config) {
+                    if(status == 200 && data.message == "Blurb Created"){
+                           alert(data.message);
+//                           $location.path("/signin");
+                       }
+                       if(status == 500){
+                           $scope.errorMessage = data.message;
+                       }
+                       if(status == 401){
+                           $scope.errorMessage = data.message;
+                       }
+                       if(status == 403){
+                           $scope.errorMessage = data.message;
+                       }
+                       
+                     }).
+                 error(function(data, status, headers, config) {
+                   $scope.errorMessage = data.message;
+                 }); 
+            }else{
+            $scope.errorMessage = "Please enter Minimum offer"
+            }
+        }
+
+}]);

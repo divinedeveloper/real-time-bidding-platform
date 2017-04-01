@@ -1,0 +1,1758 @@
+var crypto = require('crypto');
+var User = require('../app.js');
+var blurb = require('../app.js');
+var offer = require('../app.js');
+var subscribe = require('../app.js');
+var Sequelize = require('sequelize');
+var Cookies = require('cookies');
+var AES = require('crypto-js/aes');
+var path = require('path');
+var mime = require('mimetype');
+var CryptoJS = require('crypto-js'),
+	configParameters = require('../conf/config.js').configuration();
+var fs = require('node-fs');
+
+var pubnub = require('pubnub').init({
+	publish_key: configParameters.publish_key,
+	subscribe_key: configParameters.subscribe_key
+});
+var generatePassword = require('password-generator'),
+	emailUtility = require('../conf/email.js');
+
+
+// User SignUp
+
+exports.userSignup = function (sequelize, user) {
+	return function (req, res) {
+		var name = req.body.name;
+		var email = req.body.email;
+
+		var pw = crypto.createHmac('sha1', req.body.email + configParameters.encrypt_pass).update(req.body.password).digest('hex');
+		user.create({
+			name: req.body.name,
+			email: req.body.email,
+			password: pw
+		}).complete(function (err, user) {
+			if (err != null) {
+				console.log(err);
+				res.json({
+					error: true,
+					message: "User could not SignUp",
+					response: err
+				}, 500);
+				res.end();
+			} else {
+				emailUtility.signupMail(configParameters.emailFrom, email, name);
+
+				res.json({
+					error: false,
+					message: "Account Created",
+					response: user
+				})
+				res.end();
+			};
+		})
+	}
+};
+
+// User Login
+
+exports.userLogin = function (sequelize, user) {
+	return function (req, res) {
+		var password = req.body.password;
+		if (!req.body.email || !password) {
+			res.json({
+				message: "Invalid e-mail id or password"
+			}, 401);
+			return false;
+		}
+		var pw = crypto.createHmac('sha1', req.body.email + configParameters.encrypt_pass).update(password).digest('hex');
+		user.find({
+			where: {
+				email: req.body.email
+			}
+		}).complete(function (err, user) {
+			if (err != null) {
+				console.log("Query error:" + err);
+				res.json({
+					message: "An error occurred"
+				}, 500);
+				return false;
+			}
+
+			if (user != null) {
+				var id = user.id,
+					status = user.usertype,
+					email = user.email,
+					password = user.password;
+
+				var cookies = new Cookies(req, res)
+				var idencrypt = AES.encrypt(id.toString(), configParameters.encrypt_decrypt_cookie);
+
+				console.log('just id      ' + configParameters.value);
+				console.log('Hi           ' + idencrypt);
+
+				cookies.set("id", idencrypt, {
+					maxAge: configParameters.value
+				});
+
+				if (password != pw) {
+					res.json({
+						message: "The email or password you entered is incorrect"
+					}, 401);
+					res.end();
+
+				}
+				if (status == 'MERCHANT')
+					res.json({
+						error: false,
+						message: "Welcome Merchant",
+						response: user
+					});
+				else
+					res.json({
+						error: false,
+						message: "Welcome Bidder",
+						response: user
+					});
+			} else {
+				res.json({
+					message: "The email or password you entered is incorrect"
+				}, 401);
+				res.end();
+			}
+		})
+	}
+};
+
+// Forgot Password
+
+exports.forgot = function (sequelize, user) {
+	return function (req, res) {
+		var email = req.body.email;
+		var pass;
+		pass = generatePassword(6, false);
+		console.log(pass);
+		var pw = crypto.createHmac('sha1', req.body.email + configParameters.encrypt_pass).update(pass).digest('hex');
+		user.find({
+			where: {
+				email: req.body.email
+			}
+		}).complete(function (err, user) {
+			if (err != null) {
+				res.json({
+					message: "An error occurred"
+				}, 500);
+				return false;
+			}
+			if (user != null) {
+				var id = user.id;
+				if (id != null) {
+					user.updateAttributes({
+						password: pw
+					}).complete(function (err, data) {
+						if (err != null) {
+							res.json({
+								message: "An error occurred"
+							}, 500);
+							return false;
+						} else
+							res.json("Password as been sent to ur mail.Please Login with that");
+						emailUtility.sendMail(configParameters.emailFrom, email, pass);
+					});
+				}
+			} else {
+				res.json({
+					message: "Incorrect eMail"
+				}, 401);
+				res.end();
+			}
+
+
+		});
+
+	}
+};
+
+// E-Mail Check
+
+exports.checkEmail = function (sequelize, user) {
+	return function (req, res) {
+		user.find({
+			where: {
+				email: req.body.email
+			}
+		}).complete(function (err, user) {
+
+			if (user != null) {
+				res.json({
+					error: false,
+					message: "E-Mail Already Exists",
+					response: user.email
+				});
+				res.end();
+			} else {
+				res.json({
+					error: false,
+					message: "E-Mail Not Available"
+				});
+				res.end();
+			}
+		})
+	}
+};
+
+// Update User By ID
+
+exports.userUpdate = function (sequelize, user) {
+	return function (req, res) {
+
+		var cookies = new Cookies(req, res)
+		var idincookie = cookies.get('id');
+		if (idincookie == null || idincookie == '') {
+			res.json({
+				error: true,
+				message: "Not Authorized"
+			}, 401);
+			return false;
+		}
+		if (!req.body.companyname || isNaN(req.body.phone) || !req.body.phone || !req.body.description) {
+			res.json({
+				error: true,
+				message: "Required valid Input"
+			}, 401);
+			return false;
+		}
+		var iddecrypt = AES.decrypt(idincookie, configParameters.encrypt_decrypt_cookie).toString(CryptoJS.enc.Utf8);
+		console.log('idincookie     ' + idincookie);
+		console.log('iddecrypt      ' + iddecrypt);
+
+		if (isNaN(iddecrypt)) {
+
+			res.json({
+				error: true,
+				message: "Required valid User ID"
+			}, 401);
+			return false;
+		}
+		user.find({
+			where: {
+				id: iddecrypt
+			}
+		}).complete(function (err, user) {
+			if (err != null) {
+				res.json({
+					message: "An error occurred"
+				}, 500);
+				return false;
+			}
+			if (user == null || user.usertype == 'BIDDER' || user.delflag == true) {
+				res.json({
+					error: true,
+					message: "You Are Not Authorized to Update Account"
+				}, 403);
+				res.end();
+			} else {
+				user.updateAttributes({
+					companyname: req.body.companyname,
+					phone: req.body.phone,
+					companydes: req.body.description
+				}).complete(function (err, user) {
+					if (err != null) {
+						res.json({
+							error: true,
+							message: "An error occurred while updating user",
+							response: err
+						}, 500);
+						return false;
+					}
+					if (user != null) {
+						res.json({
+							error: false,
+							message: "Updated successfully",
+							response: user
+						});
+						res.end();
+					} else {
+						res.json({
+							error: true,
+							message: "update failed Because User not available"
+						}, 500);
+						res.end();
+					}
+				});
+
+			}
+		});
+	}
+
+};
+
+// Insert blurb
+
+exports.blurbAdd = function (sequelize, blurb, user) {
+	return function (req, res) {
+		var cookies = new Cookies(req, res)
+		var idincookie = cookies.get('id');
+		if (idincookie == null || idincookie == '') {
+			res.json({
+				error: true,
+				message: "Not Authorized"
+			}, 401);
+			return false;
+		}
+
+		if (!req.body.minoffer || isNaN(req.body.minoffer) || !req.body.title || !req.body.description || !req.body.url) {
+			res.json({
+				error: true,
+				message: "Required valid Input"
+			}, 400);
+			return false;
+		}
+
+		var iddecrypt = AES.decrypt(idincookie, configParameters.encrypt_decrypt_cookie).toString(CryptoJS.enc.Utf8);
+		console.log('idincookie     ' + idincookie);
+		console.log('iddecrypt      ' + iddecrypt);
+
+		if (isNaN(iddecrypt)) {
+
+			res.json({
+				error: true,
+				message: "Required valid User ID"
+			}, 401);
+			return false;
+		}
+		user.find({
+			where: {
+				id: iddecrypt
+
+			}
+		}).complete(function (err, user) {
+			if (err != null) {
+				console.log(err);
+				res.json({
+					error: true,
+					message: "An error occurred",
+					response: err
+				}, 500);
+			}
+			if (user == null || user.usertype == 'BIDDER' || user.delflag == true) {
+				res.json({
+					error: true,
+					message: "You Are Not Authorized to create blurb"
+				}, 403);
+				res.end();
+			} else blurb.create({
+				link: req.body.link,
+				minoffer: req.body.minoffer,
+				title: req.body.title,
+				description: req.body.description,
+				url: req.body.url,
+				user_id: iddecrypt
+			}).complete(function (err, blurb) {
+				if (err != null) {
+					if (err.code == 'ER_DUP_ENTRY') {
+						res.json({
+							error: true,
+							message: "Title already Exists",
+							response: err
+						}, 500);
+						res.end();
+					} else {
+						console.log(err);
+						var error = JSON.stringify(err);
+						console.log(error.length);
+						// Checking if the error message is - { url: [ 'Validation isUrl failed: url' ] }
+						if (error.length == 40) {
+							res.json({
+								error: true,
+								message: "URL is Invalid",
+								response: err
+							}, 500);
+							res.end();
+						}
+						res.json({
+							error: true,
+							message: "An error occurred while creating Blurb",
+							response: err
+						}, 500);
+						res.end();
+					}
+				} else {
+					res.json({
+						error: false,
+						message: "Blurb Created",
+						response: blurb
+					});
+					res.end();
+				}
+			});
+		});
+	}
+
+};
+
+// DELETE Blurb 
+
+exports.blurbDelete = function (sequelize, blurb) {
+	return function (req, res) {
+		var cookies = new Cookies(req, res)
+		var idincookie = cookies.get('id');
+		if (idincookie == null || idincookie == '') {
+			res.json({
+				error: true,
+				message: "Not Authorized"
+			}, 401);
+			return false;
+		}
+		var iddecrypt = AES.decrypt(idincookie, configParameters.encrypt_decrypt_cookie).toString(CryptoJS.enc.Utf8);
+		console.log('idincookie     ' + idincookie);
+		console.log('iddecrypt      ' + iddecrypt);
+
+		if (isNaN(iddecrypt)) {
+
+			res.json({
+				error: true,
+				message: "Required valid User ID"
+			}, 401);
+			return false;
+		}
+		if (isNaN(req.params.id)) {
+			res.json({
+				error: true,
+				message: "Enter valid Blurb ID"
+			}, 400);
+			return false;
+		}
+		blurb.find({
+			where: {
+				id: req.params.id
+			}
+		}).complete(function (err, blurb) {
+			if (err != null) {
+				console.log(err);
+				res.json({
+					error: true,
+					message: "An error occurred while finding Blurb",
+					response: err
+				}, 500);
+			}
+			if (blurb != null) {
+
+				if (blurb.user_id != iddecrypt) {
+
+					res.json({
+						error: true,
+						message: "User is not Allowed to Delete blurb created by another User"
+					}, 401);
+					return false;
+
+				}
+
+				blurb.updateAttributes({
+					delflag: 1
+				}).complete(function (err, blurb) {
+					if (err != null) {
+						console.log(err);
+						res.json({
+							error: true,
+							message: "An error occurred while Updateing Blurb",
+							response: err
+						}, 500);
+					} else {
+						sequelize.query("delete FROM subscribes where blurb_ID=" + req.params.id + ";",
+							subscribe, {
+								raw: true
+							}).complete(function (err1, rows) {
+
+							if (err1 != null) {
+								console.log(err);
+								res.json({
+									error: true,
+									message: "An error occurred while deleting subscribers",
+									response: err1
+								}, 500);
+							} else {
+								res.json({
+									error: false,
+									message: "Blurb Deleted...",
+									response: blurb
+								});
+								res.end();
+							}
+
+						});
+					}
+				});
+			} else {
+				res.json({
+					error: true,
+					message: "Deletion failed."
+				}, 404);
+				res.end();
+			}
+
+		});
+	}
+};
+
+// Update Blurb 
+
+exports.blurbUpdate = function (sequelize, blurb) {
+	return function (req, res) {
+		var cookies = new Cookies(req, res)
+		var idincookie = cookies.get('id');
+		if (idincookie == null || idincookie == '') {
+			res.json({
+				error: true,
+				message: "Not Authorized"
+			}, 401);
+			return false;
+		}
+		if (!req.body.title || !req.body.description || !req.body.url) {
+			res.json({
+				error: true,
+				message: "Required valid Input"
+			}, 401);
+			return false;
+		}
+		var iddecrypt = AES.decrypt(idincookie, configParameters.encrypt_decrypt_cookie).toString(CryptoJS.enc.Utf8);
+		console.log('idincookie     ' + idincookie);
+		console.log('iddecrypt      ' + iddecrypt);
+
+		if (isNaN(iddecrypt)) {
+
+			res.json({
+				error: true,
+				message: "Required valid User ID"
+			}, 401);
+			return false;
+		}
+		if (isNaN(req.params.id)) {
+			res.json({
+				error: true,
+				message: "Enter valid Blurb ID"
+			}, 400);
+			return false;
+		}
+		blurb.find({
+			where: {
+				id: req.params.id,
+				delflag: 0
+			}
+		}).complete(function (err, blurb) {
+			if (err != null) {
+				res.json({
+					message: "An error occurred"
+				}, 500);
+			}
+			if (blurb != null) {
+
+				if (blurb.user_id != iddecrypt) {
+
+					res.json({
+						error: true,
+						message: "User is not Allowed to modified blurb created by another User"
+					}, 401);
+					return false;
+
+				}
+				blurb.updateAttributes({
+					title: req.body.title,
+					description: req.body.description,
+					url: req.body.url
+				}).complete(function (err, blurb) {
+					if (err != null) {
+						res.json({
+							error: true,
+							message: "An error occurred while Updating Blurb",
+							response: err
+						}, 500);
+						res.end();
+
+					} else {
+						res.json({
+							error: false,
+							message: "Updated successfully",
+							response: blurb
+						});
+						res.end();
+					}
+
+				});
+			} else {
+				res.json({
+					error: true,
+					message: "Update failed."
+				}, 404);
+				res.end();
+			}
+		});
+	}
+};
+
+// Get blurb with No. of Offer Placed - home page
+
+exports.offerGet = function (sequelize, offer) {
+	return function (req, res) {
+		sequelize.query("SELECT blurbs.title as Blurbs, count(offers.user_Id) as OffersPlaced,blurbs.id FROM blurbs LEFT JOIN offers ON blurbs.id =offers.blurb_Id where blurbs.delflag=0 GROUP BY blurbs.id ORDER BY OffersPlaced DESC",
+			offer, {
+				raw: true
+			}).complete(function (err, rows) {
+			if (err != null) {
+				console.log("Query error:" + err);
+				res.json({
+					error: true,
+					message: "An error occurred",
+					response: err
+				}, 500);
+				res.end();
+			} else if (rows == null || rows.length == 0) {
+				res.json({
+					error: false,
+					message: "Offer On Blurb Not Available"
+				});
+				res.end();
+			} else {
+				res.json({
+					error: false,
+					message: "Offer On Blurb Available",
+					response: rows
+				});
+				res.end();
+			}
+		});
+	}
+};
+
+// Get Blurb & User Detail By Blurb ID
+
+exports.blurbGet = function (sequelize, blurb) {
+	return function (req, res) {
+		if (isNaN(req.params.id)) {
+
+			res.json({
+				message: "Blurb ID Not specifed"
+			}, 400);
+			return false;
+		}
+		sequelize.query("select u.name,u.companyname,u.phone,u.companydes,u.logo,b.*,MAX(o.offerprice) as MaxOffer from blurbs b inner join users u on b.user_id=u.id left join offers o on b.id=o.blurb_Id where b.id='" + req.params.id + "' and b.delflag=0 group by u.name;", blurb, {
+			raw: true
+		}).complete(function (err, data) {
+
+			if (err != null) {
+				console.log("Query error:" + err);
+				res.json({
+					message: "An error occurred"
+				}, 500);
+				return false;
+			} else if (data == null || data.length == 0) {
+				res.json({
+					message: "Blurbs Not Available"
+				}, 404);
+				res.end();
+			} else {
+				res.send({
+					error: false,
+					message: "Available Blurb",
+					response: data[0]
+				});
+				res.end();
+			}
+		});
+
+	}
+};
+
+
+// Get Offer History
+
+exports.blurbofferHistory = function (sequelize, offer) {
+	return function (req, res) {
+		if (isNaN(req.params.id)) {
+			res.json({
+				error: true,
+				message: "Required valid Blurb ID"
+			}, 400);
+			return false;
+		}
+		sequelize.query("select u.name as Name,o.offerprice as Offer,o.time as Time from offers o inner join users u on u.id=o.user_Id where o.blurb_Id='" + req.params.id + "' ;", offer, {
+			raw: true
+		}).complete(function (err, data) {
+			if (err != null) {
+				console.log("Query error:" + err);
+				res.json({
+					message: "An error occurred"
+				}, 500);
+				return false;
+			} else if (data == null || data.length == 0) {
+				res.json({
+					message: "No Offer On Blurbs Available"
+				});
+				return false;
+			} else {
+				res.send({
+					error: false,
+					message: "Offer Available On Blurbs",
+					response: data
+				});
+				res.end();
+			}
+		});
+
+	}
+};
+
+// Delete Subscribe
+
+exports.unsubscribe = function (sequelize, subscribe) {
+	return function (req, res) {
+
+		if (isNaN(req.params.id)) {
+			res.json({
+				error: true,
+				message: "Required valid Blurb ID"
+			}, 400);
+			return false;
+		}
+
+		subscribe.destroy({
+			id: req.params.id
+		}).complete(function (err, subscribe) {
+			if (err != null) {
+				res.json({
+					error: true,
+					message: "An error occurred while deleting subscriber"
+				}, 500);
+			}
+			if (subscribe == 1) {
+				res.json({
+					error: false,
+					message: "Unsubscribed Successfully",
+					response: subscribe
+				});
+				res.end();
+			} else {
+				res.json({
+					error: false,
+					message: "Subscriber doesn't exists",
+					response: subscribe
+				});
+				res.end();
+			}
+		});
+	}
+};
+// Make Offer API
+
+//exports.offerAdd = function (sequelize, offer, blurb) {
+//	return function (req, res) {
+//		var blurbid = req.body.blurb_Id;
+//		var cookies = new Cookies(req, res)
+//		var idincookie = cookies.get('id');
+//		var price = req.body.offerprice;
+//
+//		if (idincookie == null || idincookie == '') {
+//			res.json({
+//				error: true,
+//				message: "Not Authorized"
+//			}, 401);
+//			return false;
+//		}
+//
+//		if (req.body.offerprice == '' || isNaN(req.body.offerprice)) {
+//			res.json({
+//				error: true,
+//				message: "Required valid offerprice"
+//			}, 401);
+//			return false;
+//		}
+//
+//		var iddecrypt = AES.decrypt(idincookie, configParameters.encrypt_decrypt_cookie).toString(CryptoJS.enc.Utf8);
+//		console.log('idincookie     ' + idincookie);
+//		console.log('iddecrypt      ' + iddecrypt);
+//		if (isNaN(iddecrypt)) {
+//			res.json({
+//				error: true,
+//				message: "Required valid User ID"
+//			}, 401);
+//			return false;
+//		}
+//		blurb.find({
+//			where: {
+//				id: req.body.blurb_Id
+//			}
+//		}).complete(function (err, blurb) {
+//			if (err != null) {
+//				console.log(err);
+//				res.json({
+//					error: true,
+//					message: "An Error Occured while Finding Blurb",
+//					response: err
+//				}, 500);
+//				res.end();
+//			}
+//			if (price < blurb.minoffer) {
+//				res.json({
+//					message: "offer should be more than or equal to minimum offer of the blurb " + blurb.minoffer
+//				}, 404);
+//				return false;
+//			} else {
+//				offer.create({
+//					offerprice: req.body.offerprice,
+//					user_Id: iddecrypt,
+//					blurb_Id: req.body.blurb_Id
+//				}).complete(function (err, offer) {
+//					if (err != null) {
+//						console.log(err);
+//						res.json({
+//							error: true,
+//							message: "Offer Not Created",
+//							response: err
+//						}, 500);
+//						res.end();
+//					} else {
+//						console.log(offer.id)
+//						var inserid = offer.id;
+//						res.json({
+//							error: false,
+//							message: "Offer Created",
+//							response: offer
+//						});
+//						sequelize.query("select users.name,blurbs.title,offers.offerprice,offers.time from users inner join offers on offers.user_Id=users.id join blurbs on blurbs.id=offers.blurb_Id where offers.id='" + inserid + "';", offer, {
+//							raw: true
+//						}).complete(function (err, data) {
+//							if (err != null) {
+//								res.json({
+//									message: "An error occurred"
+//								}, 500);
+//								return false;
+//							}
+//							if (data == null || data.length == null || data.length == 0) {
+//								res.json({
+//									message: "Data Not Available"
+//								}, 404);
+//								return false;
+//							} else {
+//								var name = data[0].name,
+//									title = data[0].title,
+//									offer = data[0].offerprice,
+//									time = data[0].time;
+//
+//								var jsontext = {
+//									"Name": name,
+//									"Offer": offer,
+//									"Time": time
+//								};
+//
+//								pubnub.publish({
+//									channel: "blurbid:" + blurbid,
+//									message: jsontext,
+//									callback: function (details) {
+//										var success = details[0],
+//											response = details[1];
+//										if (success) console.log("Success!", response);
+//										if (!success) console.log("Fail!", response);
+//									}
+//								});
+//
+//							}
+//						})
+//
+//
+//					}
+//				});
+//			}
+//		});
+//	}
+//};
+
+exports.offerAdd = function (sequelize, offer, blurb) {
+	return function (req, res) {
+		var blurbid = req.body.blurb_Id;
+		var cookies = new Cookies(req, res)
+		var idincookie = cookies.get('id');
+		var price = req.body.offerprice;
+
+		if (idincookie == null || idincookie == '') {
+			res.json({
+				error: true,
+				message: "Not Authorized"
+			}, 401);
+			return false;
+		}
+
+		if (req.body.offerprice == '' || isNaN(req.body.offerprice)) {
+			res.json({
+				error: true,
+				message: "Required valid offerprice"
+			}, 401);
+			return false;
+		}
+
+		var iddecrypt = AES.decrypt(idincookie, configParameters.encrypt_decrypt_cookie).toString(CryptoJS.enc.Utf8);
+		console.log('idincookie     ' + idincookie);
+		console.log('iddecrypt      ' + iddecrypt);
+		if (isNaN(iddecrypt)) {
+			res.json({
+				error: true,
+				message: "Required valid User ID"
+			}, 401);
+			return false;
+		}
+
+		offer.max('offerprice', {
+			where: {
+				'blurb_Id': req.body.blurb_Id
+			}
+		}).complete(function (err, maxoffer) {
+			if (err != null) {
+				res.json({
+					message: "An error occurred while searching for offer",
+					response: err
+				}, 500);
+				return false;
+			}
+			if (maxoffer == null) {
+				blurb.find({
+					where: {
+						id: req.body.blurb_Id
+					}
+				}).complete(function (err, blurb) {
+					if (err != null) {
+						console.log(err);
+						res.json({
+							error: true,
+							message: "An Error Occured while Finding Blurb",
+							response: err
+						}, 500);
+						res.end();
+					}
+					if (price < blurb.minoffer) {
+						res.json({
+							message: "offer should be more than or equal to minimum offer of the blurb"
+						}, 404);
+						return false;
+					} else {
+						method();
+					}
+
+
+				});
+			} else {
+				if (price <= maxoffer) {
+					res.json({
+						error: false,
+						message: "Bid should be more than Current Bid"
+					}, 404);
+					return false;
+
+				} else {
+					method();
+				}
+
+			}
+
+			function method() {
+				offer.create({
+					offerprice: req.body.offerprice,
+					user_Id: iddecrypt,
+					blurb_Id: req.body.blurb_Id
+				}).complete(function (err, offer) {
+					if (err != null) {
+						console.log(err);
+						res.json({
+							error: true,
+							message: "Offer Not Created",
+							response: err
+						}, 500);
+						res.end();
+					} else {
+						console.log(offer.id)
+						var inserid = offer.id;
+						res.json({
+							error: false,
+							message: "Offer Created",
+							response: offer
+						});
+						sequelize.query("select users.name,blurbs.title,offers.offerprice,offers.time from users inner join offers on offers.user_Id=users.id join blurbs on blurbs.id=offers.blurb_Id where offers.id='" + inserid + "';", offer, {
+							raw: true
+						}).complete(function (err, data) {
+							if (err != null) {
+								res.json({
+									message: "An error occurred"
+								}, 500);
+								return false;
+							}
+							if (data == null || data.length == null || data.length == 0) {
+								res.json({
+									message: "Data Not Available"
+								}, 404);
+								return false;
+							} else {
+								var name = data[0].name,
+									title = data[0].title,
+									offer = data[0].offerprice,
+									time = data[0].time;
+
+								var jsontext = {
+									"Name": name,
+									"Offer": offer,
+									"Time": time
+								};
+
+								pubnub.publish({
+									channel: "blurbid:" + blurbid,
+									message: jsontext,
+									callback: function (details) {
+										var success = details[0],
+											response = details[1];
+										if (success) console.log("Success!", response);
+										if (!success) console.log("Fail!", response);
+									}
+								});
+
+							}
+						})
+
+
+					}
+				});
+
+			}
+
+		});
+
+	}
+};
+
+
+// Get All Blurb by User ID
+
+exports.allBlurb = function (sequelize, blurb) {
+	return function (req, res) {
+		var cookies = new Cookies(req, res)
+		var idincookie = cookies.get('id');
+		if (idincookie == null || idincookie == '') {
+			res.json({
+				error: true,
+				message: "Not Authorized"
+			}, 401);
+			return false;
+		}
+		var iddecrypt = AES.decrypt(idincookie, configParameters.encrypt_decrypt_cookie).toString(CryptoJS.enc.Utf8);
+		console.log('idincookie     ' + idincookie);
+		console.log('iddecrypt      ' + iddecrypt);
+		if (isNaN(iddecrypt)) {
+			res.json({
+				error: true,
+				message: "Required valid User ID"
+			}, 400);
+			return false;
+		}
+		blurb.findAll({
+			where: {
+				user_id: iddecrypt,
+				delflag: 0
+
+			},
+			attributes: ['id', 'title']
+		}).complete(function (err, blurb) {
+			if (err != null) {
+				res.json({
+					message: "An error occurred"
+				}, 500);
+				return false;
+				res.end();
+			} else if (blurb == null || blurb.length == 0) {
+				res.json({
+					message: "Blurbs Not Available"
+				}, 404);
+				return false;
+			} else {
+				res.send({
+					error: false,
+					message: "Available Blurb",
+					response: blurb
+				});
+				res.end();
+			}
+		});
+	}
+};
+
+//exports.maxofferbyblurbid = function (sequelize, offer) {
+//    return function (req, res) {
+//        var blurbid = req.params.id;
+//        if (isNaN(req.params.id)) {
+//            res.json({
+//                error: true,
+//                message: "Required valid Blurb ID"
+//            }, 400);
+//            return false;
+//        }
+//        offer.max('offerprice', {
+//            where: {
+//                'blurb_Id': req.params.id
+//            }
+//        }).complete(function (err, offer) {
+//            if (err != null) {
+//                res.json({
+//                    message: "An error occurred while searching for Blurb",
+//                    response: err
+//                }, 500);
+//                return false;
+//            } else if (!offer) {
+//                var prize = {
+//                    "BlurbId": blurbid,
+//                    "Maxoffer": 0
+//                };
+//                res.json({
+//                    error: false,
+//                    message: "Current Bid",
+//                    response: prize
+//                });
+//                res.end();
+//
+//            } else {
+//                console.log('All attributes:', offer);
+//                var price = {
+//                    "BlurbId": blurbid,
+//                    "Maxoffer": offer
+//                };
+//                res.json({
+//                    error: false,
+//                    message: "Current Bid",
+//                    response: price
+//                });
+//                res.end();
+//
+//            }
+//        })
+//    }
+//};
+
+// Get Current Bid
+
+exports.maxofferbyblurbid = function (sequelize, blurb, offer) {
+	return function (req, res) {
+		var blurbid = req.params.id;
+		if (isNaN(req.params.id)) {
+			res.json({
+				error: true,
+				message: "Required valid Blurb ID"
+			}, 400);
+			return false;
+		}
+		blurb.find({
+			where: {
+				id: req.params.id
+			}
+		}).complete(function (err, blurb) {
+			if (err != null) {
+				console.log("Query error:" + err);
+				res.json({
+					message: "An error occurred"
+				}, 500);
+				return false;
+			}
+			if (blurb != null) {
+				offer.max('offerprice', {
+					where: {
+						'blurb_Id': req.params.id
+					}
+				}).complete(function (err, offer) {
+					if (err != null) {
+						res.json({
+							message: "An error occurred while searching for Blurb",
+							response: err
+						}, 500);
+						return false;
+					}
+					if (!offer) {
+						var prize = {
+							"BlurbId": blurbid,
+							"Maxoffer": 0,
+							"Minoffer": blurb.minoffer
+						};
+						res.json({
+							error: false,
+							message: "Current Bid",
+							response: prize
+						});
+						res.end();
+
+					} else {
+						console.log('All attributes:', offer);
+						var price = {
+							"BlurbId": blurbid,
+							"Maxoffer": offer,
+							"Minoffer": blurb.minoffer
+						};
+						res.json({
+							error: false,
+							message: "Current Bid",
+							response: price
+						});
+						res.end();
+
+					}
+
+				});
+			} else {
+				res.json({
+					error: true,
+					message: "Blurb not available"
+				}, 404);
+				res.end();
+			}
+		});
+	}
+
+};
+
+
+// Add Subscribe
+
+exports.subscribeAdd = function (sequelize, subscribe) {
+	return function (req, res) {
+		var cookies = new Cookies(req, res)
+		var idincookie = cookies.get('id');
+		if (idincookie == null || idincookie == '') {
+			res.json({
+				error: true,
+				message: "Not Authorized"
+			}, 401);
+			return false;
+		}
+		var iddecrypt = AES.decrypt(idincookie, configParameters.encrypt_decrypt_cookie).toString(CryptoJS.enc.Utf8);
+		console.log('idincookie     ' + idincookie);
+		console.log('iddecrypt      ' + iddecrypt);
+		if (isNaN(iddecrypt)) {
+			res.json({
+				error: true,
+				message: "Required valid User ID"
+			}, 400);
+			return false;
+		}
+		subscribe.create({
+			user_ID: iddecrypt,
+			blurb_ID: req.body.blurb_Id
+		}).complete(function (err, subscribe) {
+			if (err != null) {
+				console.log(err);
+				res.json({
+					error: true,
+					message: "An error occurred while Storing Subscriber",
+					response: err
+				}, 500);
+				res.end();
+			} else {
+				res.json({
+					error: false,
+					message: "Subscriber Stored Successfully !!",
+					response: subscribe
+				});
+			}
+		});
+	}
+};
+
+//Get subscribe entry by user ID
+
+exports.checkSubscription = function (sequelize, subscribe) {
+	return function (req, res) {
+		var cookies = new Cookies(req, res)
+		var idincookie = cookies.get('id');
+		if (idincookie == null || idincookie == '') {
+			res.json({
+				error: true,
+				message: "Not Authorized"
+			}, 401);
+			return false;
+		}
+		var iddecrypt = AES.decrypt(idincookie, configParameters.encrypt_decrypt_cookie).toString(CryptoJS.enc.Utf8);
+		console.log('idincookie     ' + idincookie);
+		console.log('iddecrypt      ' + iddecrypt);
+		if (isNaN(iddecrypt)) {
+
+			res.json({
+				error: true,
+				message: "Required valid ID"
+			}, 401);
+			return false;
+		}
+		if (isNaN(req.params.blurb_Id)) {
+
+			res.json({
+				error: true,
+				message: "Required valid Blurb ID"
+			}, 400);
+			return false;
+		}
+		subscribe.find({
+			where: {
+				user_ID: iddecrypt,
+				blurb_ID: req.params.blurb_Id
+			}
+		}).complete(function (err, subscribe) {
+			if (err != null) {
+				console.log(err);
+				res.json({
+					error: true,
+					message: "An error occurred",
+					response: err
+				}, 500);
+				res.end();
+			}
+			if (subscribe == null) {
+				res.json({
+					error: true,
+					message: "Subscriber doesn't exists"
+				}, 404);
+				res.end();
+			} else {
+				res.json({
+					error: false,
+					message: "Subscriber exists",
+					response: subscribe
+				});
+			}
+		});
+	}
+};
+
+//file upload for blurb
+
+exports.blurbfileupload = function (sequelize, blurb) {
+	return function (req, res) {
+		if (isNaN(req.params.id)) {
+
+			res.json({
+				error: true,
+				message: "Required valid Blurb ID"
+			}, 400);
+			return false;
+		}
+		console.log("file ==== " + JSON.stringify(req.files));
+		var filepath = req.files.file.path;
+		var orgfile = req.files.file.name;
+		console.log("filename == " + orgfile);
+
+		blurb.find({
+			where: {
+				id: req.params.id
+			}
+		}).success(function (blurb) {
+			if (blurb != null && blurb.delflag == false) {
+				blurb.updateAttributes({
+					fileName: filepath,
+					orgfilename: orgfile
+				}).complete(function (err, data) {
+					if (err != null) {
+						res.json({
+							error: true,
+							message: "Error occurred while Updating file",
+							response: err
+						}, 500);
+						res.end();
+					} else {
+
+						res.json({
+							error: false,
+							message: "Updated Successfully",
+							response: data
+						})
+
+					}
+
+
+				});
+			} else {
+				res.json({
+					error: true,
+					message: "Blurb Not Found"
+				}, 404);
+			}
+		});
+	}
+};
+
+//image upload for user
+
+exports.userimageupload = function (sequelize, user) {
+	return function (req, res) {
+		if (isNaN(req.params.id)) {
+
+			res.json({
+				error: true,
+				message: "Required valid User ID"
+			}, 400);
+			return false;
+		}
+		console.log("file ==== " + JSON.stringify(req.files));
+		console.log("imagename == " + JSON.stringify(req.files.file.name));
+		console.log("Uploadpath==" + JSON.stringify(req.files.file.path));
+		var tmp_path = req.files.file.path;
+
+		var target_path = './public/profileimages/' + req.files.file.name;
+
+		fs.rename(tmp_path, target_path, function (err) {
+			if (err)
+				console.log(err);
+			fs.unlink(tmp_path, function () {
+				if (err) {
+					console.log("Error" + err);
+					return false;
+				}
+				console.log('File uploaded to: ' + target_path + ' - ' + req.files.file.size + ' bytes');
+
+				user.find({
+					where: {
+						id: req.params.id
+					}
+				}).success(function (user) {
+					if (user != null && user.delflag == false) {
+						user.updateAttributes({
+							logo: target_path,
+							oglogo: req.files.file.name
+						}).complete(function (err, user) {
+							if (err != null) {
+								res.json({
+									error: true,
+									message: "Error occurred while Updating image",
+									response: err
+								}, 500);
+								res.end();
+							} else {
+								res.json({
+									error: false,
+									message: "Updated Successfully",
+									response: user
+								})
+
+							}
+
+						});
+					} else {
+						res.json({
+							error: true,
+							message: "User Not Found"
+						}, 404);
+					}
+				});
+			});
+		});
+	}
+};
+
+//download the file
+
+exports.blurbfiledownload = function (sequelize, blurb) {
+	return function (req, res) {
+		if (isNaN(req.params.id)) {
+
+			res.json({
+				error: true,
+				message: "Required valid Blurb ID"
+			}, 400);
+			return false;
+		}
+		blurb.find({
+			where: {
+				id: req.params.id
+			}
+		}).complete(function (err, data) {
+			if (err != null) {
+				res.json({
+					error: true,
+					message: "Error occurred while Downloading file",
+					response: err
+				}, 500);
+				res.end();
+			}
+			console.log(data.fileName);
+			if (data != null && data.delflag == false) {
+				var file = configParameters.dirname + data.fileName;
+				//				var filename = path.dirname(file);
+				//				var mimetype = mime.lookup(file);
+				//				res.setHeader('Content-type', mimetype);
+				//
+				//				console.log(filename);
+				//				console.log(mimetype);
+				res.download(file);
+
+			} else {
+				res.json({
+					error: true,
+					message: "Blurb  Not Found"
+				}, 404);
+				res.end();
+			}
+		});
+	}
+};
+
+// Get Blurb By ID
+
+exports.blurbOne = function (sequelize, blurb) {
+	return function (req, res) {
+		if (isNaN(req.params.id)) {
+
+			res.json({
+				error: true,
+				message: "Required valid Blurb ID"
+			}, 400);
+			return false;
+		}
+		blurb.find({
+			where: {
+				id: req.params.id
+			}
+
+		}).complete(function (err, blurb) {
+			if (err != null) {
+				console.log(err);
+				res.json({
+					error: true,
+					message: "An Error occured while finding Blurb",
+					response: err
+				}, 500);
+				res.end();
+			}
+			if (blurb == null || blurb.length == 0 || blurb.delflag == true) {
+				res.json({
+					error: false,
+					message: "No Blurbs Available"
+				}, 404);
+				res.end();
+			} else {
+				res.send({
+					error: false,
+					message: "Available Blurb",
+					response: blurb
+				});
+				res.end();
+			}
+		});
+	}
+};
+
+
+// Get User By ID
+
+exports.userOne = function (sequelize, user) {
+	return function (req, res) {
+		var cookies = new Cookies(req, res)
+		var idincookie = cookies.get('id');
+		if (idincookie == null || idincookie == '') {
+			res.json({
+				error: true,
+				message: "Not Authorized"
+			}, 401);
+			return false;
+		}
+		var iddecrypt = AES.decrypt(idincookie, configParameters.encrypt_decrypt_cookie).toString(CryptoJS.enc.Utf8);
+		console.log('idincookie     ' + idincookie);
+		console.log('iddecrypt      ' + iddecrypt);
+
+		if (isNaN(iddecrypt)) {
+			res.json({
+				error: true,
+				message: "Required valid User ID"
+			}, 401);
+			return false;
+		}
+		user.findAll({
+			where: {
+				id: iddecrypt,
+				delflag: 0
+			},
+			attributes: ['id', 'usertype', 'name', 'email', 'companyname', 'phone', 'companydes', 'logo', 'delflag']
+		}).complete(function (err, user) {
+			if (err != null) {
+				console.log(err);
+				res.json({
+					error: true,
+					message: "An Error occured while finding User",
+					response: err
+				}, 500);
+				res.end();
+			} else if (user == null || user.length == 0) {
+				res.json({
+					error: false,
+					message: "User Not Available"
+				}, 404);
+				res.end();
+			} else {
+				res.json({
+					error: false,
+					message: "Available Users",
+					response: user[0]
+				});
+				res.end();
+			}
+		});
+	}
+};
+
+
+
+
+// API Not Useful
+
+//// Insert User
+//
+//exports.userAdd = function (sequelize, user) {
+//    return function (req, res) {
+//        var pw = crypto.createHmac('sha1', req.body.email + configParameters.encrypt_pass).update(req.body.password).digest('hex');
+//        console.log(pw);
+//        user.create({
+//            usertype: req.body.usertype,
+//            name: req.body.name,
+//            email: req.body.email,
+//            password: pw,
+//            companyname: req.body.companyname,
+//            phone: req.body.phone,
+//            companydes: req.body.description,
+//            logo: req.body.logo
+//        }).complete(function (err, user) {
+//            if (err != null) {
+//                console.log(err);
+//                res.json({
+//                    error: true,
+//                    message: "An error occurred while creating User",
+//                    response: err
+//                }, 500);
+//                res.end();
+//            } else {
+//                res.json({
+//                    error: false,
+//                    message: "Account Created",
+//                    response: user
+//                })
+//                res.end();
+//            };
+//        })
+//    }
+//};
+
+
+//// Get All User
+//
+//exports.userAll = function (sequelize, user) {
+//    return function (req, res) {
+//        user.findAll({
+//            where: {
+//                delflag: 0
+//            },
+//            attributes: ['id', 'usertype', 'name', 'email', 'password', 'companyname', 'phone', 'companydes', 'logo', 'delflag']
+//        }).complete(function (err, user) {
+//            if (err != null) {
+//                res.json(err);
+//                res.end();
+//            } else if (user == null || user.length == 0) {
+//                res.json("User Not Available");
+//                res.end();
+//            } else {
+//                res.json({
+//                    error: false,
+//                    message: "Available Users",
+//                    response: user
+//                });
+//                res.end();
+//            }
+//        });
+//    }
+//};
+
+
+//// DELETE User by id 
+//
+//exports.userDelete = function (sequelize, user) {
+//    return function (req, res) {
+//
+//        var cookies = new Cookies(req, res)
+//        var idincookie = cookies.get('id');
+//        if (idincookie == null || idincookie == '') {
+//            res.json({
+//                error: true,
+//                message: "Not Authorized"
+//            }, 401);
+//            return false;
+//        }
+//
+//        var iddecrypt = AES.decrypt(idincookie, configParameters.encrypt_decrypt_cookie).toString(CryptoJS.enc.Utf8);
+//        console.log('idincookie     ' + idincookie);
+//        console.log('iddecrypt      ' + iddecrypt);
+//
+//        if (isNaN(iddecrypt)) {
+//
+//            res.json({
+//                error: true,
+//                message: "Required valid User ID"
+//            }, 401);
+//            return false;
+//        }
+//        user.find({
+//            where: {
+//                id: iddecrypt
+//            }
+//        }).complete(function (err, user) {
+//            if (err != null) {
+//                console.log(err);
+//                return false;
+//            }
+//            if (user != null) {
+//                user.updateAttributes({
+//                    delflag: 1
+//                }).complete(function (err, user) {
+//                    if (err != null) {
+//                        console.log(err);
+//                        return false;
+//                    } else {
+//                        res.json({
+//                            error: false,
+//                            message: "User Deleted...",
+//                            response: user
+//                        });
+//                        res.end();
+//                    }
+//                });
+//            } else {
+//                res.json({
+//                    error: true,
+//                    message: "Cannot Delete User Because User not availabale"
+//                });
+//                res.end();
+//            }
+//        });
+//    }
+//};
+
+//// Get All Blurb
+//
+//exports.blurbAll = function (sequelize, blurb) {
+//    return function (req, res) {
+//        blurb.findAll({
+//            where: {
+//                delflag: 0
+//            },
+//            attributes: ['id', 'link', 'minoffer', 'title', 'description', 'url', 'fileName', 'user_id']
+//        }).complete(function (err, blurb) {
+//            if (err != null) {
+//                res.json(err);
+//                res.end();
+//            } else if (blurb.length == 0) {
+//                res.json("No Blurb available");
+//                res.end();
+//            } else {
+//                res.send({
+//                    error: false,
+//                    message: "Available Blurb",
+//                    response: blurb
+//                });
+//                res.end();
+//            }
+//        });
+//    }

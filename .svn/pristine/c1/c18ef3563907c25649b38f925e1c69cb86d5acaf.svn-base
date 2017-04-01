@@ -1,0 +1,21 @@
+{
+	"name": "Blurb-Bidding",
+	"version": "0.0.1",
+	"private": true,
+	"dependencies": {
+		"express": "3.0.0",
+		"mysql": "latest",
+		"crypto-js": "*",
+		"moment": "latest",
+		"nodemailer": "latest",
+		"password-generator": "*",
+		"node-fs": "*",
+		"pubnub": "*",
+		"sequelize": "*",
+		"cookies": "*",
+		"path": "*",
+		"mimetype": "*",
+		"dateformat": "*",
+		"node-fs": "*"
+	}
+}

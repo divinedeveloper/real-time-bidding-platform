@@ -1,0 +1,35 @@
+module.exports = function (sequelize, DataTypes) {
+    return = sequelize.define('Subscribe', {
+        //    subusid: {
+        //        type: Sequelize.INTEGER,
+        //        allowNull: false,
+        //        references: 'user',
+        //        referencesKey: 'id',
+        //        validate: {
+        //            notNull: true
+        //        }
+        //    },
+        //    subblid: {
+        //        type: Sequelize.INTEGER,
+        //        allowNull: false,
+        //        references: 'blurb',
+        //        referencesKey: 'id',
+        //        validate: {
+        //            notNull: true
+        //        }
+        //    },
+    });
+    user.hasMany(subscribe, {
+        foreignKey: 'user_ID'
+    });
+    subscribe.belongsTo(user, {
+        foreignKey: 'user_ID'
+    });
+
+
+    blurb.hasMany(subscribe, {
+        foreignKey: 'blurb_ID'
+    });
+    subscribe.belongsTo(blurb, {
+        foreignKey: 'blurb_ID'
+    });

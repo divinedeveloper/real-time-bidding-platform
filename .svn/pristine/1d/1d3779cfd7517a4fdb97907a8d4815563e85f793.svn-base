@@ -1,0 +1,28 @@
+'use strict';
+/*
+ var app = angular.module('myApp', []).run(function($rootScope) {
+      $rootScope.color = 'yellow';
+      $rootScope.user = {}
+  $rootScope.user.email = 'ddfdgfdg'
+ $rootScope.user.usertype = 'ddfgdfg'
+    });*/
+
+
+// Declare app level module which depends on filters, and services
+var myApp = angular.module('myApp', ['myApp.filters', 'myApp.services', 'myApp.directives','ngRoute']).
+ 	config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
+        $routeProvider.when('/', {templateUrl: 'partials/blurbs-list', controller: 'BlurbsListCtrl'});
+	    $routeProvider.when('/signin', {templateUrl: 'partials/sign-in', controller: 'SignInCtrl'});
+	    $routeProvider.when('/signup', {templateUrl: 'partials/sign-up', controller: 'SignUpCtrl'});
+        $routeProvider.when('/forgot', {templateUrl: 'partials/forgot-password', controller: 'ForgotPasswordCtrl'});
+        $routeProvider.when('/blurb-detail', {templateUrl: 'partials/blurb-detail', controller: 'BlurbDetailCtrl'});
+	    $routeProvider.otherwise({redirectTo: '/'});
+	    $locationProvider.html5Mode(true);
+  }]);
+
+myApp.run(function ($rootScope) {
+    $rootScope.user = {}
+    $rootScope.user.email = null
+    $rootScope.user.usertype = null
+    
+})

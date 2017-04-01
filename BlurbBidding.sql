@@ -1,0 +1,144 @@
+CREATE DATABASE  IF NOT EXISTS `blurbDB` /*!40100 DEFAULT CHARACTER SET latin1 */;
+USE `blurbDB`;
+-- MySQL dump 10.13  Distrib 5.5.37, for debian-linux-gnu (x86_64)
+--
+-- Host: 127.0.0.1    Database: blurbDB
+-- ------------------------------------------------------
+-- Server version	5.5.37-0ubuntu0.14.04.1
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `blurbs`
+--
+
+DROP TABLE IF EXISTS `blurbs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `blurbs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `link` varchar(255) DEFAULT NULL,
+  `minoffer` bigint(20) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text,
+  `url` varchar(255) DEFAULT NULL,
+  `fileName` varchar(255) DEFAULT NULL,
+  `delflag` tinyint(1) NOT NULL DEFAULT '0',
+  `user_id` int(11) DEFAULT NULL,
+  `orgfilename`  varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `title` (`title`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `blurbs`
+--
+
+
+
+--
+-- Table structure for table `offers`
+--
+
+DROP TABLE IF EXISTS `offers`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `offers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `offerprice` bigint(20) NOT NULL,
+  `time` datetime DEFAULT NULL,
+  `user_Id` int(11) DEFAULT NULL,
+  `blurb_Id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `offers`
+--
+
+LOCK TABLES `offers` WRITE;
+/*!40000 ALTER TABLE `offers` DISABLE KEYS */;
+INSERT INTO `offers` VALUES (1,57000,'2014-08-21 06:29:00',6,1),(2,45000,'2014-08-21 06:29:12',6,2),(3,48000,'2014-08-21 06:29:20',6,3),(4,49000,'2014-08-21 06:29:32',6,4),(5,58000,'2014-08-21 06:30:48',7,1),(6,50000,'2014-08-21 06:30:58',7,3),(7,59000,'2014-08-21 06:32:07',8,1),(8,49000,'2014-08-21 06:32:17',8,2),(9,60000,'2014-08-21 06:32:53',9,1),(10,50000,'2014-08-21 06:33:01',9,4),(11,45000,'2014-08-21 06:33:33',1,4),(12,60000,'2014-08-21 06:34:05',2,1),(13,45000,'2014-08-21 06:34:44',5,2),(14,45000,'2014-08-21 06:35:18',2,3),(15,45000,'2014-08-21 06:36:16',9,3),(27,62000,'2014-08-21 13:07:13',9,1),(28,85000,'2014-08-22 06:04:24',4,1),(29,87000,'2014-08-22 06:05:34',4,1),(30,88000,'2014-08-22 06:07:12',1,1),(31,90000,'2014-08-22 06:14:12',1,1),(32,60000,'2014-08-22 07:14:35',9,3),(33,45000,'2014-08-22 07:19:39',3,1),(34,48000,'2014-08-22 07:20:36',3,1),(35,85000,'2014-08-22 07:22:54',3,3),(36,90000,'2014-08-22 07:24:05',3,3),(37,82000,'2014-08-22 07:24:44',3,3),(38,95000,'2014-08-22 08:36:42',1,1),(39,78000,'2014-08-22 10:56:22',9,NULL),(40,78000,'2014-08-22 11:04:32',8,NULL),(41,78000,'2014-08-22 11:06:14',8,NULL),(42,78000,'2014-08-22 11:12:00',8,NULL),(43,78000,'2014-08-22 11:13:45',8,NULL),(44,45000,'2014-08-22 11:18:23',8,1),(45,79000,'2014-08-22 11:29:46',8,NULL),(46,80000,'2014-08-22 12:02:50',9,8),(47,99900,'2014-08-22 12:04:49',8,6);
+/*!40000 ALTER TABLE `offers` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `subscribes`
+--
+
+DROP TABLE IF EXISTS `subscribes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `subscribes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_ID` int(11) DEFAULT NULL,
+  `blurb_ID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `subscribes`
+--
+
+LOCK TABLES `subscribes` WRITE;
+/*!40000 ALTER TABLE `subscribes` DISABLE KEYS */;
+INSERT INTO `subscribes` VALUES (1,6,1),(3,7,1),(4,7,3),(5,7,2),(6,8,1),(7,8,2),(8,9,1),(11,2,1),(12,5,2),(13,2,3),(14,1,1),(15,1,1),(16,1,1),(17,3,3);
+/*!40000 ALTER TABLE `subscribes` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `usertype` enum('MERCHANT','BIDDER') DEFAULT 'BIDDER',
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `companyname` varchar(255) DEFAULT NULL,
+  `phone` varchar(255) DEFAULT NULL,
+  `companydes` text,
+  `logo` varchar(255) DEFAULT NULL,
+   `oglogo` varchar(255) DEFAULT NULL,
+  `delflag` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `users`
+--
+
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES (1,'MERCHANT','Sunil','sunil@nisostech.com','947ee1d1c6e2bc6999228ee26534f1a1442ed99b','NIL Group','9988556622','Happpy Home','NIL',0),(2,'MERCHANT','Sachin','sachin@nisostech.com','6d10844c49b666ebdb6aa792049b43b25076db9d','TEN Group','9881763693','Happpy Home','TEN',0),(3,'MERCHANT','Rahul','rahul@nisostech.com','48703792d11df269ac633320f13b2201dd990755','RS Group','9702356155','Happpy Home','RS',0),(4,'MERCHANT','Amol','amol@nisostech.com','ff72cb14388ae1b5a5861abdf96fa93985f6fa27','AMD Group','9594345193','Happpy Home','AMD',0),(5,'MERCHANT','Sudhir','sudhir@nisostech.com','47be00ad388c817f8503fb4fa43fd0afe6f7305c','SID Group','9594123556','Happpy Home','SID',0),(6,'BIDDER','Pravin','pravin@nisostech.com','2dcf28609ed01470d3ea25a4b09e270e2b2a5a67',NULL,NULL,NULL,NULL,0),(7,'BIDDER','Pratik','pratik@nisostech.com','6be64d42928d05d9c17ae697a702ff97d06ab78a',NULL,NULL,NULL,NULL,0),(8,'BIDDER','Parmod','pramod@nisostech.com','4b2f99c6c61dabcc07c81a614c30be36877e0e29',NULL,NULL,NULL,NULL,0),(9,'BIDDER','Vishal','vish@nisostech.com','9abf4791aff2087762be94c811a7719e2acad5fc',NULL,NULL,NULL,NULL,0),(10,'BIDDER','Ranjeet','ranjit@nisostech.com','2a790373b410f0a202141b54e9ae55f27b93c590',NULL,NULL,NULL,NULL,0),(11,'BIDDER','NIL','namdev@nisostech.com','a8d21a8a1dc8071fc3b93acb296c2a1d2893ea1c',NULL,NULL,NULL,NULL,0);
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2014-08-22 20:00:53

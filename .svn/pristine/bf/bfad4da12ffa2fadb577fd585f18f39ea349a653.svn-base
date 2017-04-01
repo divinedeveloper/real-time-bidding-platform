@@ -1,0 +1,144 @@
+<div ng-controller="BlurbDetailCtrl">
+<nav class="navbar navbar-default" role="navigation">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">Blurb.io</a>
+      </div>
+      <div class="collapse navbar-collapse navbar-ex1-collapse">
+        <ul class="nav navbar-nav">
+          <li>
+          </li>
+          <li>
+          </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+          </li>
+          <li>
+            <a href="#">jens.a.munch@gmail.com</a>
+          </li>
+          <li>
+            <a href="#" class="pull-right">Sign Out</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="container">
+      <div>
+        <div>
+          <br>
+        </div>
+      </div>
+      <div class="btn-group">
+        <a href="#" class="btn btn-default">Share to Facebook</a>
+        <a href="#" class="btn btn-default">Tweet</a>
+        <a href="#" class="btn btn-default">Send Email</a>
+        <a href="#" class="btn btn-default">Get QR Code</a>
+      </div>
+      <div class="well">
+        <img src="https://s3.amazonaws.com/media.jetstrap.com/B97r67yiRwa3It4hzkGt_Screen Shot 2014-07-10 at 12.19.47.png"
+        class="pull-right">
+        <h3>
+          <div>
+            <span style="line-height: 1.1;">Zoopla - 020 7768 4355</span>
+          </div>
+        </h3>
+        <p>
+          Text describing Zoopla
+        </p>
+      </div>
+      <a href="#" class="btn btn-lg btn-primary">Place a bid</a>
+      <a href="#" class="btn btn-lg btn-primary">Subscribe</a>
+      <p>
+      </p>
+      <div>
+        <div class="well">
+          <h3>
+            Current bid: £350,000
+          </h3>
+        </div>
+      </div>
+      <h4>
+        Jenner House, Flat 23, Bloomsbury WC1N
+      </h4>
+      <div>
+        <div>
+          Duncan Chase is proud to present this bright, self-contained large studio
+          apartment, located on the lower ground of this popular mansion block and
+          just minutes from Russell Square and the Brunswick Centre.
+        </div>
+        <div>
+          This property has been recently re-decorated throughout, the apartment
+          offers you a separate kitchen, large bathroom.
+        </div>
+        <div>
+          <br>
+        </div>
+        <div>
+          The apartment also benefits from, high ceilings and plenty of light.
+          <div>
+            <br>
+          </div>
+          <div>
+            <a href="http://www.zoopla.co.uk/for-sale/details/33656933">http://www.zoopla.co.uk/for-sale/details/33656933</a>
+            <br>
+          </div>
+        </div>
+      </div>
+      <div>
+        <br>
+        <a href="#" class="btn btn-link">Download PDF</a>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col-md-4">
+          <b>
+        Name
+      </b>
+          <p>
+          </p>
+        </div>
+        <div class="col-md-4">
+          <p>
+          </p>
+          <b>
+        Offer</b>
+        </div>
+        <div class="col-md-4">
+          <p>
+          </p>
+          <b>
+        Time
+      </b>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4">
+          <p>
+            Jens M
+          </p>
+        </div>
+        <div class="col-md-4">
+          <p>
+            370,000
+          </p>
+        </div>
+        <div class="col-md-4">
+          <p>
+            6 July, 23:45
+          </p>
+        </div>
+      </div>
+      <table class="table">
+        <tbody>
+          <tr>
+          </tr>
+        </tbody>
+      </table>
+      <table class="table">
+        <tbody>
+          <tr>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+</div>

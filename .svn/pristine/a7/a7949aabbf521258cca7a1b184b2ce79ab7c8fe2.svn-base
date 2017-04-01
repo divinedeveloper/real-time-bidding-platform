@@ -1,0 +1,48 @@
+myApp.controller('SignInCtrl', ['$scope', '$http', '$rootScope', '$location', function($scope, $http, $rootScope, $location) {
+        $scope.errorMessage;
+
+        $scope.signIn = function(){
+            if($scope.signinemail!="" && $scope.signinpasword!=""){
+                var signInData = {}
+                signInData.email = $scope.signinemail;
+                signInData.password= $scope.signinpasword;
+                 $http({method: 'POST', url: '/signin', data: signInData}).
+                   success(function(data, status, headers, config) {
+        //            $scope.userDetail = data;
+        //            $scope.successMessage = data.message;
+                       if(status == 200 ){
+                           alert('data.response.usertype   ' +data.response.usertype);
+                           alert('data.response.email'+data.response.email);
+
+                          $rootScope.user.email = data.response.email;
+                           $rootScope.user.usertype = data.response.usertype;
+                           alert($rootScope.user.email);
+                           alert($rootScope.user.usertype);
+                           /*if($rootScope.user.usertype == "BIDDER"){
+
+                           }*/
+                       }else{
+                           $scope.errorMessage = data.message;
+                       }
+
+                     }).
+                 error(function(data, status, headers, config) {
+                   $scope.errorMessage = data.message;
+                 }); 
+        }else{
+            $scope.errorMessage = "Please enter credentials"
+        }
+
+
+
+        }
+
+        $scope.getForgotPassword = function(){
+            $location.path("/forgot");
+        }
+        
+        $scope.goToSignUp = function(){
+            $location.path("/signup");
+        }
+    
+}]);

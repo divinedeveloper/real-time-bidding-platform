@@ -1,0 +1,221 @@
+'use strict';
+
+/* Controllers */
+
+
+/*myApp.controller('AppCtrl', ['$scope', '$http', function($scope, $http) {
+	$http({method: 'GET', url: '/api/name'}).
+	success(function(data, status, headers, config) {
+    	$scope.name = data.name;
+  	}).
+  	error(function(data, status, headers, config) {
+    	$scope.name = 'Error!'
+  	});
+        $scope.successMessage="";
+    $scope.errorMessage="";
+        
+    $scope.getBlurbsList = function(){
+       $http({method: 'GET', url: '/api/offer'}).
+	success(function(data, status, headers, config) {
+        if(data.rows.length > 0){
+    	   $scope.blurb_list = data.rows;
+        }else{
+            $scope.errorMessage = 'No Blurbs found'
+        }
+  	}).
+  	error(function(data, status, headers, config) {
+    	$scope.errorMessage = 'Error!'
+  	}); 
+    }
+}]);
+
+myApp.controller('MyCtrl1', ['$scope', '$http', function($scope, http) {
+
+}]);
+
+myApp.controller('MyCtrl2', ['$scope', '$http', function($scope, http) {
+
+}]);*/
+
+
+myApp.controller('AppCtrl', ['$scope', '$http', '$rootScope',  function($scope, $http, $rootScope) {
+	$scope.init = function () {
+        $location.path("/");
+    }
+    
+    /*$scope.guest;
+    $scope.bidder;
+    $scope.merchant;
+    $scope.isLoggedIn;
+    if($rootScope.user.usertype === "BIDDER"){
+        $scope.bidder = true;
+        $scope.guest = false;
+        $scope.merchant = false;
+    }
+    if($rootScope.user.usertype === "MERCHANT"){
+        $scope.merchant = true;
+        $scope.guest = false;
+        $scope.bidder = false;
+    }
+    if($rootScope.user.usertype == null || $rootScope.user.usertype == ""){
+        $scope.guest = true;
+        $scope.guest = false; 
+        $scope.merchant = false;
+    }*/
+    
+    
+}]);
+    
+
+myApp.controller('BlurbsListCtrl', ['$scope', '$http', '$location', '$rootScope', function($scope, $http, $location, $rootScope) {
+	$scope.successMessage="";
+    $scope.errorMessage="";
+    
+        
+    $scope.getBlurbsList = function(){
+       $http({method: 'GET', url: '/offer'}).
+	   success(function(data, status, headers, config) {
+        if(data.response.length > 0){
+    	   $scope.blurb_list = data.response;
+        }else{
+            $scope.errorMessage = 'No Blurbs found'
+        }
+  	}).
+  	error(function(data, status, headers, config) {
+    	$scope.errorMessage = 'Error!'
+  	}); 
+    }
+    
+    $scope.getSignIn = function(){
+        $location.path("/signin");
+    }
+    
+    $scope.goToHomePage= function(){
+        $location.path("/");
+    }
+    
+}]);
+
+/*function BlurbsListCtrl($scope, $http, $location){
+    $scope.successMessage="";
+    $scope.errorMessage="";
+        
+    $scope.getBlurbsList = function(){
+       $http({method: 'GET', url: '/offer'}).
+	   success(function(data, status, headers, config) {
+        if(data.length > 0){
+    	   $scope.blurb_list = data;
+        }else{
+            $scope.errorMessage = 'No Blurbs found'
+        }
+  	}).
+  	error(function(data, status, headers, config) {
+    	$scope.errorMessage = 'Error!'
+  	}); 
+    }
+    
+    $scope.getSignIn = function(){
+        $location.path("/sign-in");
+    }
+    
+}*/
+
+
+ 
+
+/*myApp.controller('SignInCtrl', ['$scope', '$http', function($scope, $http) {
+//        $scope.errorMessage;
+//
+//        $scope.signIn = function(){
+//            var signInData = {}
+//            signInData.email = $scope.signinemail;
+//            signInData.password= $scope.signinpasword;
+//            
+//            $scope.signin(signInData);
+
+            //todo this call with restangular
+            $http({method: 'POST', url: '/signin', data: signInData}).
+               success(function(data, status, headers, config) {
+    //            $scope.userDetail = data;
+    //            $scope.successMessage = data.message;
+                   if(status == 200 && (data.message == "Welcome Bidder" || data.message == "Welcome Merchant")){
+                       alert('data.response.usertype   ' +data.response.usertype);
+                       alert('data.response.email'+data.response.email);
+                       
+                      $rootScope.user.email = data.response.email;
+                       $rootScope.user.usertype = data.response.usertype;
+                       alert($rootScope.user.email);
+                       alert($rootScope.user.usertype);
+                       if($rootScope.user.usertype == "BIDDER"){
+                           
+                       }
+                   }else{
+                       $scope.errorMessage = data.message;
+                   }
+
+                 }).
+             error(function(data, status, headers, config) {
+               $scope.errorMessage = data;
+             }); 
+            
+//            Restangular.one('signin').post(signInData)
+
+
+
+        }
+
+        $scope.getForgotPassword = function(){
+            console.log("something");
+        }
+    
+}]);*/
+
+
+
+/*
+function SignInCtrl($scope, $http, $rootScope){
+    $scope.errorMessage;
+    
+    $scope.signIn = function(){
+        var signIn = {}
+        signIn.email = $scope.signinemail;
+        signIn.password= $scope.signinpasword;
+        
+        //todo tis call with restangular
+        $http({method: 'POST', url: '/signin', data: signIn}).
+	       success(function(data, status, headers, config) {
+//            $scope.userDetail = data;
+//            $scope.successMessage = data.message;
+               if(data.message == "Welcome Bidder" || data.message == "Welcome Merchant"){
+                   alert(data.response.usertype);
+                   $rootscope.usertype = data.response.usertype;
+                   $rootscope.email = data.response.email;
+                       alert($rootscope.usertype);
+                       alert($rootscope.usertype);
+               }else{
+                   $scope.errorMessage = data.message;
+               }
+            
+  	         }).
+  	     error(function(data, status, headers, config) {
+    	   $scope.errorMessage = data;
+  	     }); 
+        
+        
+        
+    }
+    
+    $scope.getForgotPassword = function(){
+        //to route to f-p page
+        console.log("something");
+    }
+}
+*/
+
+
+
+function ForgotPasswordCtrl($scope, $http){
+}
+
+function BlurbDetailCtrl($scope, $http){
+}

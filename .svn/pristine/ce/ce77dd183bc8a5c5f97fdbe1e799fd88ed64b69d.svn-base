@@ -1,0 +1,65 @@
+module.exports = function (sequelize, DataTypes) {
+    return sequelize.define('Blurb', {
+        link: {
+            type: Sequelize.STRING,
+            allowNull: false,
+            validate: {
+                notNull: true,
+                notEmpty: true
+            }
+        },
+        minoffer: {
+            type: Sequelize.STRING,
+            allowNull: false,
+            validate: {
+                notNull: true,
+                notEmpty: true
+            }
+        },
+        title: {
+            type: Sequelize.STRING,
+            allowNull: false,
+            unique: true,
+            validate: {
+                notEmpty: true,
+                notNull: true
+            }
+        },
+        description: {
+            type: Sequelize.TEXT,
+            allowNull: true,
+            validate: {
+                notNull: false
+            }
+        },
+        url: {
+            type: Sequelize.STRING,
+            allowNull: true,
+            validate: {
+                notNull: false,
+                isUrl: true
+            }
+        },
+        fileName: {
+            type: Sequelize.STRING,
+            allowNull: true,
+            validate: {
+                notNull: false
+            }
+        },
+        delflag: {
+            type: Sequelize.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
+            validate: {
+                notNull: true
+            }
+        }
+
+    });
+    user.hasMany(blurb, {
+        foreignKey: 'user_id'
+    });
+    blurb.belongsTo(user, {
+        foreignKey: 'user_id'
+    });

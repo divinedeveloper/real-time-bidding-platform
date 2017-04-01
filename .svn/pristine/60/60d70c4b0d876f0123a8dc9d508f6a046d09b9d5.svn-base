@@ -1,0 +1,73 @@
+// import all the models define in the application
+
+var createSchema = function () {
+    console.log('dataSource = ' + dataSource.dbConnection());
+    User = dataSource.dbConnection().import('./user_m.js');
+    Blurb = dataSource.dbConnection().import('./blurb_m.js');
+    Offer = dataSource.dbConnection().import('./offer_m.js');
+    Subscribe = dataSource.dbConnection().import('./subscribe_m.js');
+
+
+    describeRelation(User, Blurb, Offer, Subscribe);
+
+
+}
+
+// relation between models are defined in this function and tables are created in the mysql server
+
+function describeRelation(User, Blurb, Offer, Subscribe) {
+
+    User.sync()
+    Blurb.sync()
+    Offer.sync()
+    Subscribe.sync()
+
+    //mapping between user and blurb
+
+    user.hasMany(blurb, {
+        foreignKey: 'user_id'
+    });
+    blurb.belongsTo(user, {
+        foreignKey: 'user_id'
+    });
+
+    //mapping between user and offer
+
+    user.hasMany(offer, {
+        foreignKey: 'user_Id'
+    });
+    offer.belongsTo(user, {
+        foreignKey: 'user_Id'
+    });
+
+
+    //mapping between offer and blurb
+
+
+    blurb.hasMany(offer, {
+        foreignKey: 'blurb_Id'
+    });
+    offer.belongsTo(blurb, {
+        foreignKey: 'blurb_Id'
+    });
+
+    //mapping between user and subscribe
+
+    user.hasMany(subscribe, {
+        foreignKey: 'user_ID'
+    });
+    subscribe.belongsTo(user, {
+        foreignKey: 'user_ID'
+    });
+
+    //mapping between blurb and subscribe
+
+    blurb.hasMany(subscribe, {
+        foreignKey: 'blurb_ID'
+    });
+    subscribe.belongsTo(blurb, {
+        foreignKey: 'blurb_ID'
+    });
+
+
+    module.exports.createSchema = createSchema;

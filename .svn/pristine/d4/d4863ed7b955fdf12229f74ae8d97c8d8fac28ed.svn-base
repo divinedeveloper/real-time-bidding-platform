@@ -1,0 +1,110 @@
+'use strict';
+
+/* Controllers */
+
+myApp.controller('AppCtrl', ['$scope', '$http', '$rootScope', '$location','$localStorage', function($scope, $http, $rootScope, $location, $localStorage) {
+	$scope.init = function () {
+        $location.path("/");
+    }
+    
+    $scope.getSignIn = function(){
+        $location.path("/signin");
+    }
+    
+    $scope.goToCreateBlurb = function(){
+        $location.path("/admin-create");
+    }
+    
+    $scope.goToEdit = function(){
+        $location.path("/admin-blurbs");
+    }
+    
+    $scope.goToAccount = function(){
+        $location.path("/create-company");
+    }
+    
+    $scope.signOut = function () {
+        //call api on success of it do this
+        
+        if($localStorage.user != null){
+                $http({method: 'GET', url: '/logout'}).
+                   success(function(data, status, headers, config) {
+                        if(status == 200){
+                           /* $localStorage.email = null;
+                            $localStorage.usertype = null;
+                            $rootScope.user.email= null;
+                            $rootScope.user.usertype= null;*/
+                            $localStorage.user = null;
+                            $rootScope.user=null;
+                            if($localStorage.subscribedUser){
+                                $localStorage.subscribedUser=null;
+                            }
+                            if($rootScope.subscribedUser){
+                                $rootScope.subscribedUser=null;
+                            }
+                            $location.path("/");
+
+                        }else{
+                            $scope.errorMessage = 'unable to signout'
+                        }
+                    }).
+                    error(function(data, status, headers, config) {
+                        $scope.errorMessage = 'Error! on signout'
+                    }); 
+                
+            
+                
+        }
+       /* $localStorage.email = null;
+        $localStorage.usertype = null;*/
+        /*alert($localStorage.email);
+        alert($localStorage.usertype);
+        alert($rootScope.user.email);
+        alert($rootScope.user.usertype);
+        */
+        //remove user details from rootscope and then reload views
+//        $location.path("/");
+    }
+    
+    $scope.goToHomePage= function(){
+        $location.path("/");
+    }
+    
+    
+}]);
+    
+
+myApp.controller('BlurbsListCtrl', ['$scope', '$http', '$location', '$rootScope', '$routeParams', function($scope, $http, $location, $rootScope, $routeParams) {
+	$scope.successMessage="";
+    $scope.errorMessage="";
+    
+        
+    $scope.getBlurbsList = function(){
+       $http({method: 'GET', url: '/offer'}).
+	   success(function(data, status, headers, config) {
+        if(data.response){
+    	   $scope.blurb_list = data.response;
+        }else{
+            $scope.errorMessage = 'No Blurbs found'
+        }
+  	}).
+  	error(function(data, status, headers, config) {
+    	$scope.errorMessage = 'Error!'
+  	}); 
+    }
+    
+    $scope.getSignIn = function(){
+        $location.path("/signin");
+    }
+    
+    /*$scope.goToHomePage= function(){
+        $location.path("/");
+    }*/
+    
+    $scope.goToBlurbDetail= function(id){
+        $routeParams.id = id;
+        $location.path("/blurb-detail/" +$routeParams.id);
+    }
+    
+}]);
+

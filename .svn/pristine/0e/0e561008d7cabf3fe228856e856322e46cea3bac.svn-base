@@ -1,0 +1,138 @@
+<div ng-controller="BlurbDetailCtrl">
+
+    <div class="container" ng-init="getDetails()">
+        <div>
+            <div>
+                <br>
+            </div>
+        </div>
+        <div class="messages">
+            <span class="success-message" ng-bind="successMessage"></span>
+            <span class="error-message" ng-bind="errorMessage"></span>
+        </div>
+        <div class="btn-group">
+            <a href="#" class="btn btn-default">Share to Facebook</a>
+            <a href="#" class="btn btn-default">Tweet</a>
+            <a href="#" class="btn btn-default">Send Email</a>
+            <a href="#" class="btn btn-default">Get QR Code</a>
+        </div>
+        <div class="well">
+            <img ng-src="{{blurb.logo}}" class="pull-right" >
+            <h3>
+          <div>
+            <span style="line-height: 1.1;">{{blurb.companyname}} - {{blurb.phone}}</span>
+          </div>
+        </h3>
+            <p>
+                {{blurb.companydes}}
+            </p>
+        </div>
+        <a id="place-bid-link" class="btn btn-lg btn-primary" href ng-click="placeBid(blurb.id)">Place a bid</a>
+        <span ng-show="!$root.subscribedUser">
+            <a id="subscribe-link" class="btn btn-lg btn-primary" href ng-click="subscribe(blurb.id)">Subscribe</a>
+        </span>
+        <span ng-show="$root.subscribedUser">
+            <a id="unsubscribe-link" class="btn btn-lg btn-primary" href ng-click="unSubscribe(blurb.id)">UnSubscribe</a>
+        </span>
+        <p>
+        </p>
+        <div>
+            <div class="well">
+                <h3>
+            Current bid: £<span ng-if="blurb.MaxOffer == null">0</span>{{blurb.MaxOffer}}
+          </h3>
+            </div>
+        </div>
+        <h4>
+        {{blurb.title}}
+      </h4>
+        <div>
+            <div>
+                {{blurb.description}}
+            </div>
+            <div>
+
+            </div>
+            <div>
+                <br>
+            </div>
+            <div>
+
+                <div>
+                    <br>
+                </div>
+                <div>
+                    <!--
+            <a href="http://www.zoopla.co.uk/for-sale/details/33656933">http://www.zoopla.co.uk/for-sale/details/33656933</a>
+-->
+                    <a id="url-link" ng-href="{{blurb.url}}">{{blurb.url}}</a>
+                    <br>
+                </div>
+            </div>
+        </div>
+        <div>
+            <br>
+            <!--
+        <a href="#" class="btn btn-link">Download PDF</a> ng-click="downloadPdf(blurb.fileName)"
+-->
+<!--
+            <a id="download-link" class="btn btn-link" href="{{blurb.fileName}}" target="_self" 
+               download="{{blurb.fileName}}">Download PDF</a>{{blurb.fileName}}
+-->
+            <a target="_self" id="download-link" class="btn btn-link" href="/blurbfiledownload/{{blurb.id}}">
+                Download PDF</a>{{blurb.orgfilename}}
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-md-4">
+                <b>
+        Name
+      </b>
+                <p>
+                </p>
+            </div>
+            <div class="col-md-4">
+                <p>
+                </p>
+                <b>
+        Offer</b>
+            </div>
+            <div class="col-md-4">
+                <p>
+                </p>
+                <b>
+        Time
+      </b>
+            </div>
+        </div>
+        <div class="row" ng-repeat="offer in offerList">
+            <div class="col-md-4">
+                <p>
+                    {{offer.Name}}
+                </p>
+            </div>
+            <div class="col-md-4">
+                <p>
+                    {{offer.Offer}}
+                </p>
+            </div>
+            <div class="col-md-4">
+                <p>
+                    {{offer.Time}}
+                </p>
+            </div>
+        </div>
+        <table class="table">
+            <tbody>
+                <tr>
+                </tr>
+            </tbody>
+        </table>
+        <table class="table">
+            <tbody>
+                <tr>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

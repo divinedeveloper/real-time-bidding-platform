@@ -1,0 +1,73 @@
+var dbConnection = function () {
+    var Sequelize = require('sequelize');
+    switch (process.env.NODE_ENV) {
+    case 'development':
+        var sequelize = new Sequelize('xyz', 'root', 'root', {
+            host: 'localhost',
+            port: 3306,
+            dialect: 'mysql',
+            logging: true,
+            maxConcurrentQueries: 100,
+            omitNull: true,
+            syncOnAssociation: true,
+            pool: {
+                maxConnections: 5,
+                maxIdleTime: 30
+            }
+        })
+        checkConnection(sequelize);
+        return sequelize;
+
+    case 'production':
+        var sequelize = new Sequelize('xyz', 'root', 'root', {
+            host: 'localhost',
+            port: 3306,
+            dialect: 'mysql',
+            logging: true,
+            maxConcurrentQueries: 100,
+            omitNull: true,
+            syncOnAssociation: true,
+            pool: {
+                maxConnections: 5,
+                maxIdleTime: 30
+            }
+        });
+        checkConnection(sequelize);
+        return sequelize;
+
+    case 'test':
+        var sequelize = new Sequelize('xyz', 'root', 'root', {
+            host: 'localhost',
+            port: 3306,
+            dailect: 'mysql',
+            logging: true,
+            maxConcurrentQueries: 100,
+            omitNull: true,
+            syncOnAssociation: true,
+            pool: {
+                maxConnections: 5,
+                maxIdleTime: 30
+            }
+        });
+        checkConnection(sequelize);
+        return sequelize;
+    }
+}
+
+/**
+ *@author Abhimanyu
+ * function is used to verify whether software is proper connected to database or not
+ */
+
+function checkConnection(sequelize) {
+    sequelize.authenticate().complete(function (err) {
+        if (!!err) {
+            console.log('Unable to connect to the database:', err)
+        } else {
+            console.log('Connection has been established successfully.')
+        }
+    })
+}
+//Done
+
+module.exports.dbConnection = dbConnection;
